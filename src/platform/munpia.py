@@ -33,11 +33,7 @@ class Munpia(Platform):
       .find("div", {"class": "dt cover-box"}) \
       .find("img")["src"] \
       .strip()
-    title = novel_content \
-      .find("div", {"class":"dd detail-box"}) \
-      .find("h2")
-    title.find("span").decompose()
-    title = title.text.strip()
+    title = content.find("title").text.split(" « ")[0]
 
     number_text = novel_content.find_all("dl", {"class":"meta-etc meta"})[1].text
     number_list_1 = [''.join(i for i in x if i.isdigit()) for x in number_text.split("\n")]
@@ -51,5 +47,6 @@ class Munpia(Platform):
       view=view,
       book=book,
       good=good,
-      type=PlatformType.MUNPIA
+      type=PlatformType.MUNPIA,
+      link=url
     )

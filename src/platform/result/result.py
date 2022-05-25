@@ -14,6 +14,7 @@ class Result:
     self.view: int = kwargs["view"]
     self.good: int = kwargs["good"]
     self.book: int = kwargs["book"]
+    self.link: str = kwargs["link"]
     self.data = kwargs
 
   def __str__(self) -> str:

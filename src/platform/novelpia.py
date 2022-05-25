@@ -57,5 +57,6 @@ class Novelpia(Platform):
       view=view,
       book=book,
       good=good,
-      type=PlatformType.NOVELPIA
+      type=PlatformType.NOVELPIA,
+      link=url
     )

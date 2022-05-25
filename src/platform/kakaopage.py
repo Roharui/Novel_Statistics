@@ -27,13 +27,16 @@ class Kakaopage(Platform):
     book = novel_content["page"]
     good = None
 
+    link = f"https://page.kakao.com/home?seriesId={novel_content['id']}"
+
     return Result(
       title=title,
       thumbnail=thumbnail,
       view=view,
       book=book,
       good=good,
-      type=PlatformType.KAKAOPAGE
+      type=PlatformType.KAKAOPAGE,
+      link=link
     )
 
 
