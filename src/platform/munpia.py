@@ -1,5 +1,6 @@
 import json
 
+
 from typing import Final
 from urllib import parse
 
@@ -22,10 +23,14 @@ class Munpia(Platform):
     url = self.__searchURL(title)
     content = self._getContentParser(url)
 
-    return self.searchURL(content.find("a", {"class":"title"})["href"])
+    return [
+      self.searchURL(novel["href"])
+      for novel in content.find_all("a", {"class":"title col-xs-6"})
+    ]
 
   # 소설 링크로 검색
   def searchURL(self, url: str) -> Result:
+    print("문피아 - " + url)
     content = self._getContentParser(url)
     novel_content = content.find("div", {"class":"novel-info"})
 
@@ -40,6 +45,7 @@ class Munpia(Platform):
     number_list_2 = [int(x) for x in number_list_1 if len(x)]
     
     book, view, good, _ = number_list_2
+    print("문피아 완료 - " + url)
 
     return Result(
       title=title,

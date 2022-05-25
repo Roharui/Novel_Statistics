@@ -1,13 +1,18 @@
 import argparse
+
 import platform
 
-from typing import Dict
+from typing import Dict, List, Union
 from urllib.parse import urlparse
 from validators import url
+from exception import WrongLinkException
 
+from platform.result import Result
 
 PLATFORM: Dict[str, platform.Platform] = {
-  "novelpia.com" : platform.Novelpia()
+  "novelpia.com" : platform.Novelpia(),
+  "novel.munpia.com": platform.Munpia(),
+  "page.kakao.com": platform.Kakaopage()
 }
 
 class NovelStatic:
@@ -20,10 +25,13 @@ class NovelStatic:
     else:
       self.title = __input
 
-  def search(self):
+  def search(self) -> Union[Result, List[Result]]:
     # 이름 일 경우
     if self.title:
-      pass
+      result = []
+      for i in [engin.searchTitle(self.title) for engin in PLATFORM.values()]:
+        result += i
+      return result
     # 링크일 경우
     else:
       host = urlparse(self.url).hostname
@@ -32,12 +40,11 @@ class NovelStatic:
       try:
         engin = PLATFORM[host]
       except Exception as e:
-        print("잘못된 링크입니다")
-        return
+        raise WrongLinkException()
 
-      engin.searchURL(self.url)
+      return engin.searchURL(self.url)
 
-if __name__ == '__main__':
+def main():
   parser = argparse.ArgumentParser(description="소설 통계 프로그램")
 
   parser.add_argument("input", help="소설 제목 혹은 링크")
@@ -45,5 +52,6 @@ if __name__ == '__main__':
   args = parser.parse_args()
 
   NovelStatic(args.input).search()
-
   
+if __name__ == '__main__':
+  main()

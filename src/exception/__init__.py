@@ -1,0 +1,1 @@
+from .wrong_link_exception import WrongLinkException
