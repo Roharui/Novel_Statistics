@@ -5,9 +5,9 @@
 '''
 
 from typing import Final
+from bs4 import BeautifulSoup
 from requests import get, exceptions
 
-from urllib import parse
 from .result import Result
 
 HEADER: Final[dict] = {
@@ -40,6 +40,9 @@ class Platform:
       print("알수 없는 오류 : ", erra)
 
     return result.content
+
+  def _getContentParser(self, link: str) -> BeautifulSoup:
+    return BeautifulSoup(self._getContent(link), "html.parser")
 
   # 소설 제목으로 검색
   def searchTitle(self, title: str) -> Result:
