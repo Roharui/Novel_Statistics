@@ -6,7 +6,7 @@
 
 from typing import Final
 from bs4 import BeautifulSoup
-from requests import get, exceptions, post
+from aiohttp import ClientSession
 
 from .result import Result
 
@@ -21,7 +21,6 @@ POST_HEADER: Final[dict] = {
   "Accept-Encoding": "gzip, deflate, br",
   "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
   "Connection": "keep-alive",
-  "Content-Length": "30",
   "Content-Type": "application/x-www-form-urlencoded",
   "Host": "api2-page.kakao.com",
   "Origin": "https://page.kakao.com",
@@ -41,30 +40,26 @@ class Platform:
     self.SEARCHLINK = None
 
   # 소설 검색 기능
-  def _getContent(self, link: str, data: str=None, GET: bool=True) -> bytes:
+  async def _getContent(self, link: str) -> bytes:
     result = None
 
-    try:
-      if GET:
-        result = get(link, headers=GET_HEADER)
-      else:
-        result = post(link, data=data, headers=POST_HEADER)
-    except exceptions.Timeout as errd:
-      print("제한 시간 초과 : ", errd)
+    async with ClientSession() as session:
+      async with session.get(link, headers=GET_HEADER) as response:
+        result = await response.text()
     
-    except exceptions.ConnectionError as errc:
-      print("연결 오류 : ", errc)
-        
-    except exceptions.HTTPError as errb:
-      print("Http 오류 : ", errb)
+    return result
 
-    except exceptions.RequestException as erra:
-      print("알수 없는 오류 : ", erra)
+  async def _postContent(self, link: str, data: str) -> bytes:
+    result = None
 
-    return result.content
+    async with ClientSession() as session:
+      async with session.post(link, data=data, headers=POST_HEADER) as response:
+        result = await response.text()
+    
+    return result
 
-  def _getContentParser(self, link: str) -> BeautifulSoup:
-    return BeautifulSoup(self._getContent(link), "html.parser")
+  async def _getContentParser(self, link: str) -> BeautifulSoup:
+    return BeautifulSoup(await self._getContent(link), "html.parser")
 
   # 소설 제목으로 검색
   def searchTitle(self, title: str) -> Result:

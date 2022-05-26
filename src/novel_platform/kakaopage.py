@@ -3,9 +3,9 @@ import json
 from typing import Final, List
 from urllib import parse
 
-from platform.result.result import PlatformType
+from novel_platform.result.result import PlatformType
 
-from .platform import Platform
+from .novel_platform import Platform
 from .result import Result
 
 class Kakaopage(Platform):
@@ -13,7 +13,7 @@ class Kakaopage(Platform):
     super().__init__()
     self.SEARCHLINK: Final[str] =  "https://api2-page.kakao.com/api/v5/store/search"
 
-  def __parseResult(self, novel_content) -> Result:
+  async def __parseResult(self, novel_content) -> Result:
     title = novel_content["title"]
     thumbnail = f"https://dn-img-page.kakao.com/download/resource?kid={novel_content['image_url']}&filename=th1"
 
@@ -34,23 +34,23 @@ class Kakaopage(Platform):
     )
 
   # 소설 제목으로 검색
-  def searchTitle(self, title: str) -> List[Result]:
+  async def searchTitle(self, title: str) -> List[Result]:
     word = f"word={parse.quote(title)}"
-    content = json.loads(self._getContent(self.SEARCHLINK, data=word, GET=False))
+    content = json.loads(await self._postContent(self.SEARCHLINK, data=word))
 
     novel_content_list = content["results"][2]["items"]
 
     return [self.__parseResult(novel_content) for novel_content in novel_content_list]
 
   # 소설 링크로 검색
-  def searchURL(self, url: str) -> Result:
-    content = self._getContentParser(url)
+  async def searchURL(self, url: str) -> Result:
+    content = await self._getContentParser(url)
 
     title = content.find("h2", {"class":"text-ellipsis css-jgjrt"}).text
 
     word = f"word={parse.quote(title)}"
-    content = json.loads(self._getContent(self.SEARCHLINK, data=word, GET=False))
+    content = json.loads(self._postContent(self.SEARCHLINK, data=word))
 
     novel_content = content["results"][2]["items"][0]
 
-    return self.__parseResult(novel_content)
+    return await self.__parseResult(novel_content)

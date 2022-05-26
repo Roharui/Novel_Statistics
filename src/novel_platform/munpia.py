@@ -4,9 +4,9 @@ import json
 from typing import Final
 from urllib import parse
 
-from platform.result.result import PlatformType
+from novel_platform.result.result import PlatformType
 
-from .platform import Platform
+from .novel_platform import Platform
 from .result import Result
 
 class Munpia(Platform):
@@ -19,9 +19,9 @@ class Munpia(Platform):
     return f"{self.SEARCHLINK}/{word}/order/search_result"
 
   # 소설 제목으로 검색
-  def searchTitle(self, title: str) -> Result:
+  async def searchTitle(self, title: str) -> Result:
     url = self.__searchURL(title)
-    content = self._getContentParser(url)
+    content = await self._getContentParser(url)
 
     return [
       self.searchURL(novel["href"])
@@ -29,9 +29,8 @@ class Munpia(Platform):
     ]
 
   # 소설 링크로 검색
-  def searchURL(self, url: str) -> Result:
-    print("문피아 - " + url)
-    content = self._getContentParser(url)
+  async def searchURL(self, url: str) -> Result:
+    content = await self._getContentParser(url)
     novel_content = content.find("div", {"class":"novel-info"})
 
     thumbnail = "https:" + novel_content \
@@ -45,7 +44,6 @@ class Munpia(Platform):
     number_list_2 = [int(x) for x in number_list_1 if len(x)]
     
     book, view, good, _ = number_list_2
-    print("문피아 완료 - " + url)
 
     return Result(
       title=title,

@@ -1,13 +1,16 @@
 import argparse
+import asyncio
 
-import platform
+import novel_platform as platform
 
 from typing import Dict, List, Union
 from urllib.parse import urlparse
 from validators import url
 from exception import WrongLinkException
 
-from platform.result import Result
+from novel_platform import Result
+
+from itertools import chain
 
 PLATFORM: Dict[str, platform.Platform] = {
   "novelpia.com" : platform.Novelpia(),
@@ -25,12 +28,11 @@ class NovelStatic:
     else:
       self.title = __input
 
-  def search(self) -> Union[Result, List[Result]]:
+  async def search(self) -> Union[Result, List[Result]]:
     # 이름 일 경우
     if self.title:
-      result = []
-      for i in [engin.searchTitle(self.title) for engin in PLATFORM.values()]:
-        result += i
+      coroutine = await asyncio.gather(*[engin.searchTitle(self.title) for engin in PLATFORM.values()])
+      result = await asyncio.gather(*chain(*coroutine))
       return result
     # 링크일 경우
     else:
@@ -42,16 +44,17 @@ class NovelStatic:
       except Exception as e:
         raise WrongLinkException()
 
-      return engin.searchURL(self.url)
+      return await engin.searchURL(self.url)
 
-def main():
+async def main():
   parser = argparse.ArgumentParser(description="소설 통계 프로그램")
 
   parser.add_argument("input", help="소설 제목 혹은 링크")
 
   args = parser.parse_args()
 
-  NovelStatic(args.input).search()
+  for i in await NovelStatic(args.input).search():
+    print(i)
   
 if __name__ == '__main__':
-  main()
+  asyncio.run(main())
