@@ -12,6 +12,11 @@ from novel_platform import Result
 
 from itertools import chain
 
+import sys
+py_ver = int(f"{sys.version_info.major}{sys.version_info.minor}")
+if py_ver > 37 and sys.platform.startswith('win'):
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 PLATFORM: Dict[str, platform.Platform] = {
   "novelpia.com" : platform.Novelpia(),
   "novel.munpia.com": platform.Munpia(),
@@ -37,12 +42,11 @@ class NovelStatic:
     # 링크일 경우
     else:
       host = urlparse(self.url).hostname
-      engin: platform.Platform = None
 
-      try:
-        engin = PLATFORM[host]
-      except Exception as e:
+      if not host in PLATFORM.keys():
         raise WrongLinkException()
+      
+      engin: platform.Platform = PLATFORM[host]
 
       return await engin.searchURL(self.url)
 
@@ -53,8 +57,12 @@ async def main():
 
   args = parser.parse_args()
 
-  for i in await NovelStatic(args.input).search():
-    print(i)
+  result = await NovelStatic(args.input).search()
+
+  if type(result) == list:
+    for i in result: print(i)
+  else:
+    print(result)
   
 if __name__ == '__main__':
   asyncio.run(main())
