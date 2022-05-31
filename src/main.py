@@ -1,26 +1,25 @@
 import argparse
 import asyncio
 
-import novel_platform as platform
-
 from typing import Dict, List, Union
 from urllib.parse import urlparse
 from validators import url
-from exception import WrongLinkException
 
-from novel_platform import Result
+from .exception import WrongLinkException
+from .novel_platform import Result, Novelpia, Munpia, Kakaopage, Platform
 
 from itertools import chain
 
 import sys
+
 py_ver = int(f"{sys.version_info.major}{sys.version_info.minor}")
 if py_ver > 37 and sys.platform.startswith('win'):
   asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-PLATFORM: Dict[str, platform.Platform] = {
-  "novelpia.com" : platform.Novelpia(),
-  "novel.munpia.com": platform.Munpia(),
-  "page.kakao.com": platform.Kakaopage()
+PLATFORM: Dict[str, Platform] = {
+  "novelpia.com" : Novelpia(),
+  "novel.munpia.com": Munpia(),
+  "page.kakao.com": Kakaopage()
 }
 
 class NovelStatic:
@@ -46,7 +45,7 @@ class NovelStatic:
       if not host in PLATFORM.keys():
         raise WrongLinkException()
       
-      engin: platform.Platform = PLATFORM[host]
+      engin: Platform = PLATFORM[host]
 
       return await engin.searchURL(self.url)
 

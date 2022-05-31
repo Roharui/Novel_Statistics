@@ -4,10 +4,9 @@ import json
 from typing import Final, List
 from urllib import parse
 
-from novel_platform.result.result import PlatformType
 
 from .novel_platform import Platform
-from .result import Result
+from .result import Result, PlatformType
 
 class Novelpia(Platform):
   def __init__(self) -> None:

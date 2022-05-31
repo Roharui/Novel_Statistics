@@ -2,9 +2,9 @@
 from enum import Enum, auto
 
 class PlatformType(Enum):
-  NOVELPIA=auto()
-  MUNPIA=auto()
-  KAKAOPAGE=auto()
+  NOVELPIA="novelpia"
+  MUNPIA="munpia"
+  KAKAOPAGE="kakaopage"
 
 class Result:
   def __init__(self, **kwargs) -> None:
