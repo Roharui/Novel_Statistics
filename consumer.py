@@ -1,4 +1,5 @@
 import asyncio
+import json
 import aio_pika
 import aio_pika.abc
 
@@ -32,7 +33,7 @@ async def main(loop):
       # Cancel consuming after __aexit__
       async for message in queue_iter:
         async with message.process():
-          link = message.body.decode()
+          link = json.loads(message.body.decode())["link"]
           await do(link)
           
 
