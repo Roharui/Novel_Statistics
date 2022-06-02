@@ -23,7 +23,11 @@ PLATFORM: Dict[str, Platform] = {
 }
 
 class NovelStatic:
-  def __init__(self, __input: str) -> None:
+  def __init__(self, only_link: bool = False) -> None:
+    self.only_link = only_link
+
+  async def search(self, __input: str) -> Union[Result, List[Result]]:
+
     self.title = None
     self.url = None
 
@@ -32,9 +36,10 @@ class NovelStatic:
     else:
       self.title = __input
 
-  async def search(self) -> Union[Result, List[Result]]:
     # 이름 일 경우
     if self.title:
+      if self.only_link:
+        return None
       coroutine = await asyncio.gather(*[engin.searchTitle(self.title) for engin in PLATFORM.values()])
       result = await asyncio.gather(*chain(*coroutine))
       return result
@@ -56,7 +61,7 @@ async def main():
 
   args = parser.parse_args()
 
-  result = await NovelStatic(args.input).search()
+  result = await NovelStatic().search(args.input)
 
   if type(result) == list:
     for i in result: print(i)

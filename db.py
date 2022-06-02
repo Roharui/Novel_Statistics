@@ -4,10 +4,9 @@ import argparse
 import psycopg2
 import asyncio
 
-from src import NovelStatic
-from dotenv import load_dotenv
+from src import NovelStatic, Result
 
-from src.novel_platform.result.result import Result
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -41,23 +40,24 @@ class DB:
         _id int;
       begin
         select title, thumbnail, id into _ori_title, _ori_thumbnail, _id from novel n where n.link = _link;
+
         if not exists (select 1 from novel n where n.link = _link) then
           INSERT INTO "novel"("createdAt", "updatedAt", "title", "type", "thumbnail", "link") 
-              VALUES 
-              (DEFAULT, DEFAULT, _title, _type, _thumbnail, _link);
-            select id into _id from novel n where n.link = _link;
+          VALUES 
+          (DEFAULT, DEFAULT, _title, _type, _thumbnail, _link);
+          select id into _id from novel n where n.link = _link;
         end if;
 
         if _ori_title <> _title or _ori_thumbnail <> _thumbnail then 
           UPDATE "novel" SET 
-              "title" = _title, 
-              "thumbnail" = _thumbnail
-              WHERE "link" = _link;
-            end if;
+            "title" = _title, 
+            "thumbnail" = _thumbnail
+            WHERE "link" = _link;
+        end if;
           
-          INSERT INTO "novel-info"("createdAt", "updatedAt", "view", "good", "book", "novelId") 
-          VALUES 
-          (DEFAULT, DEFAULT, _view, _good, _book, _id);
+        INSERT INTO "novel-info"("createdAt", "updatedAt", "view", "good", "book", "novelId") 
+        VALUES 
+        (DEFAULT, DEFAULT, _view, _good, _book, _id);
         
       end $$;
       """, 
