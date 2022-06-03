@@ -1,10 +1,13 @@
 import asyncio
 import json
-import aio_pika
-import aio_pika.abc
+import logging
+
+from aio_pika import Message, connect
+from aio_pika.abc import AbstractIncomingMessage
 
 from src import NovelStatic
 from db import DB
+from src.exception.wrong_link_exception import WrongLinkException
 
 QUEUE = "novel.link"
 
@@ -12,45 +15,70 @@ crawler = NovelStatic(only_link=True)
 
 db = DB()
 
-async def main(loop):
-  print("[X] 컨슈머 작동 시작")
+async def main() -> None:
+  # Perform connection
+  connection = await connect("amqp://guest:guest@localhost/")
 
-  connection = await aio_pika.connect_robust(
-      "amqp://guest:guest@127.0.0.1/", loop=loop
-  )
+  # Creating a channel
+  channel = await connection.channel()
+  exchange = channel.default_exchange
 
-  async with connection:
+  # Declaring queue
+  queue = await channel.declare_queue(QUEUE)
 
-    # Creating channel
-    channel: aio_pika.abc.AbstractChannel = await connection.channel()
+  print(" [x] Awaiting RPC requests")
 
-    # Declaring queue
-    queue: aio_pika.abc.AbstractQueue = await channel.declare_queue(
-        QUEUE
-    )
+  # Start listening the queue with name 'hello'
+  async with queue.iterator() as qiterator:
+    message: AbstractIncomingMessage
+    async for message in qiterator:
+      try:
+        async with message.process(requeue=False):
+          assert message.reply_to is not None
 
-    async with queue.iterator() as queue_iter:
-      # Cancel consuming after __aexit__
-      async for message in queue_iter:
-        async with message.process():
-          link = json.loads(message.body.decode())["link"]
-          await do(link)
+          n = json.loads(message.body.decode())
+
+          response = {
+            "code": 200
+          }
+
+          if not "link" in n.keys():
+            response["code"] = 400
+          else:
+            if not await do(n["link"]):
+              response["code"] = 500
+
+          await exchange.publish(
+            Message(
+              body=json.dumps(response).encode(),
+              correlation_id=message.correlation_id,
+            ),
+            routing_key=message.reply_to,
+          )
+          print("Request complete")
+      except Exception:
+        logging.exception("Processing error for message %r", message)
           
 
-async def do(link: str):
+async def do(link: str) -> bool:
   print("[X] 수신 성공 - {}".format(link))
-  result = await crawler.search(link)
+
+  try:
+    result = await crawler.search(link)
+  except WrongLinkException as e:
+    print("[X] 크롤링 실패 (잘못된 링크) - {}".format(link))
+    return False
 
   if result is None:
     print("[X] 크롤링 실패 (잘못된 값) - {}".format(link))
-    return
+    return False
   
   print("[X] 크롤링 성공 - {}".format(link))
   db.do(result)
   print("[X] DB 갱신 성공 - {}".format(link))
 
+  return True
+
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main(loop))
-    loop.close()
+  asyncio.run(main())
