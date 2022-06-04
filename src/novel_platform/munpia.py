@@ -4,6 +4,8 @@ import json
 from typing import Final
 from urllib import parse
 
+from src.exception.wrong_page_exception import WrongPageException
+
 from .novel_platform import Platform
 from .result import Result, PlatformType
 
@@ -31,10 +33,16 @@ class Munpia(Platform):
     content = await self._getContentParser(url)
     novel_content = content.find("div", {"class":"novel-info"})
 
-    thumbnail = "https:" + novel_content \
-      .find("div", {"class": "dt cover-box"}) \
-      .find("img")["src"] \
-      .strip()
+    thumbnail = None
+
+    try:
+      thumbnail = "https:" + novel_content \
+        .find("div", {"class": "dt cover-box"}) \
+        .find("img")["src"] \
+        .strip()
+    except AttributeError as e:
+      raise WrongPageException
+
     title = content.find("title").text.split(" « ")[0]
 
     number_text = novel_content.find_all("dl", {"class":"meta-etc meta"})[1].text

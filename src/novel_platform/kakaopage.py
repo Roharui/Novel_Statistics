@@ -3,6 +3,8 @@ import json
 from typing import Final, List
 from urllib import parse
 
+from src.exception.wrong_page_exception import WrongPageException
+
 from .novel_platform import Platform
 from .result import Result, PlatformType
 
@@ -47,8 +49,10 @@ class Kakaopage(Platform):
     title = content.find("h2", {"class":"text-ellipsis css-jgjrt"}).text
 
     word = f"word={parse.quote(title)}"
-    content = json.loads(self._postContent(self.SEARCHLINK, data=word))
+    content = json.loads(await self._postContent(self.SEARCHLINK, data=word))
 
-    novel_content = content["results"][2]["items"][0]
+    novel_content = content["results"][2]["items"]
 
-    return await self.__parseResult(novel_content)
+    if not novel_content: raise WrongPageException()
+
+    return await self.__parseResult(novel_content[0])

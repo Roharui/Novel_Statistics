@@ -4,6 +4,8 @@ import json
 from typing import Final, List
 from urllib import parse
 
+from src.exception.wrong_page_exception import WrongPageException
+
 
 from .novel_platform import Platform
 from .result import Result, PlatformType
@@ -36,8 +38,14 @@ class Novelpia(Platform):
   async def searchURL(self, url: str) -> Result:
     content = await self._getContentParser(url)
 
-    novel_content = content.find("div", {"class":"mobile_hidden s_inv"}).find("div").find("table")
-    number_data = novel_content.find_all("tr")[2].find("div").find("font").text
+    novel_content = None
+    number_data = None
+
+    try:
+      novel_content = content.find("div", {"class":"mobile_hidden s_inv"}).find("div").find("table")
+      number_data = novel_content.find_all("tr")[2].find("div").find("font").text
+    except AttributeError as e:
+      raise WrongPageException
 
     thumbnail_wrap = novel_content \
       .find("tr") \
