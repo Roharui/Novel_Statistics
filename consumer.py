@@ -1,9 +1,8 @@
 import asyncio
-from ctypes import Union
 import json
 import logging
 
-from typing import Dict
+from typing import Dict, Union
 
 from aio_pika import Message, connect
 from aio_pika.abc import AbstractIncomingMessage

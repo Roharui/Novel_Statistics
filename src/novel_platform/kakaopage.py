@@ -19,7 +19,7 @@ class Kakaopage(Platform):
 
     view = novel_content["read_count"]
     book = novel_content["page"]
-    good = None
+    good = 0
 
     link = f"https://page.kakao.com/home?seriesId={novel_content['id']}"
 
