@@ -1,1 +1,2 @@
 from .wrong_link_exception import WrongLinkException
+from .wrong_page_exception import WrongPageException

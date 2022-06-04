@@ -1,6 +1,9 @@
 import asyncio
+from ctypes import Union
 import json
 import logging
+
+from typing import Dict
 
 from aio_pika import Message, connect
 from aio_pika.abc import AbstractIncomingMessage
@@ -8,6 +11,7 @@ from aio_pika.abc import AbstractIncomingMessage
 from src import NovelStatic
 from db import DB
 from src.exception.wrong_link_exception import WrongLinkException
+from src.exception.wrong_page_exception import WrongPageException
 
 QUEUE = "novel.link"
 
@@ -38,15 +42,7 @@ async def main() -> None:
 
           n = json.loads(message.body.decode())
 
-          response = {
-            "code": 200
-          }
-
-          if not "link" in n.keys():
-            response["code"] = 400
-          else:
-            if not await do(n["link"]):
-              response["code"] = 500
+          response = await do(n)
 
           await exchange.publish(
             Message(
@@ -60,24 +56,50 @@ async def main() -> None:
         logging.exception("Processing error for message %r", message)
           
 
-async def do(link: str) -> bool:
+async def do(request: Dict[str, str]) -> Dict[str, Union[int, str, None]]:
+
+  if not "link" in request.keys():
+    return  {
+      "response": 404,
+      "err": "값이 없습니다"
+    }
+  
+  link = request["link"]
+
   print("[X] 수신 성공 - {}".format(link))
 
   try:
     result = await crawler.search(link)
   except WrongLinkException as e:
     print("[X] 크롤링 실패 (잘못된 링크) - {}".format(link))
-    return False
+    return {
+      "response": 403,
+      "err": str(e)
+    }
+    
+  except WrongPageException as e:
+    print("[X] 크롤링 실패 (잘못된 페이지) - {}".format(link))
+    return {
+      "response": 403,
+      "err": str(e)
+    }
 
   if result is None:
     print("[X] 크롤링 실패 (잘못된 값) - {}".format(link))
-    return False
+    return {
+      "response": 404,
+      "err": "링크가 아닙니다"
+    }
+    
   
   print("[X] 크롤링 성공 - {}".format(link))
   db.do(result)
   print("[X] DB 갱신 성공 - {}".format(link))
 
-  return True
+  return {
+    "response": 200,
+    "err": None
+  }
 
 
 if __name__ == "__main__":
