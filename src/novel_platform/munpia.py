@@ -43,6 +43,15 @@ class Munpia(Platform):
     except AttributeError as e:
       raise WrongPageException
 
+    author = novel_content.find("dl", {"class":"meta-author meta"}) \
+      .find("dd") \
+      .find("a") \
+      .text.strip()
+
+    is_end = not not (novel_content.find("span", {"class":"xui-finish"}))
+    
+    age_limit = 0
+
     title = content.find("title").text.split(" « ")[0]
 
     number_text = novel_content.find_all("dl", {"class":"meta-etc meta"})[1].text
@@ -58,5 +67,8 @@ class Munpia(Platform):
       book=book,
       good=good,
       type=PlatformType.MUNPIA,
-      link=url
+      link=url,
+      is_end=is_end,
+      age_limit=age_limit,
+      author=author
     )

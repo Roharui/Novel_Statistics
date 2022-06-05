@@ -24,34 +24,40 @@ class DB:
     cur = self.conn.cursor()
 
     cur.execute(
-      """
+      f"""
       do $$
       declare
-        _title varchar := %s;
-        _type novel_type_enum := %s;
-        _thumbnail text := %s;
-        _link varchar := %s;
-        _view int := %s;
-        _good int := %s;
-        _book int := %s;
+        _title varchar := '{result.title}';
+        _type novel_type_enum := '{result.type.value}';
+        _thumbnail text := '{result.thumbnail}';
+        _link varchar := '{result.link}';
+        _view int := '{result.view}';
+        _good int := '{result.good}';
+        _book int := '{result.book}';
+
+        _is_end bool := {"true" if result.is_end else "false"};
+        _age_limit int := {result.age_limit};
+        _author varchar := '{result.author}';
         
         _ori_title varchar;
         _ori_thumbnail varchar;
+        _ori_is_end bool;
         _id int;
       begin
-        select title, thumbnail, id into _ori_title, _ori_thumbnail, _id from novel n where n.link = _link;
+        select title, thumbnail, id, is_end into _ori_title, _ori_thumbnail, _id, _ori_is_end from novel n where n.link = _link;
 
         if not exists (select 1 from novel n where n.link = _link) then
-          INSERT INTO "novel"("createdAt", "updatedAt", "title", "type", "thumbnail", "link") 
+          INSERT INTO "novel"("createdAt", "updatedAt", "title", "type", "thumbnail", "link", "is_end", "age_limit", "author") 
           VALUES 
-          (DEFAULT, DEFAULT, _title, _type, _thumbnail, _link);
+          (DEFAULT, DEFAULT, _title, _type, _thumbnail, _link, _is_end, _age_limit, _author);
           select id into _id from novel n where n.link = _link;
         end if;
 
-        if _ori_title <> _title or _ori_thumbnail <> _thumbnail then 
+        if _ori_title <> _title or _ori_thumbnail <> _thumbnail or _is_end <> _ori_is_end then 
           UPDATE "novel" SET 
             "title" = _title, 
-            "thumbnail" = _thumbnail
+            "thumbnail" = _thumbnail,
+            "is_end" = _is_end
             WHERE "link" = _link;
         end if;
           
@@ -60,29 +66,51 @@ class DB:
         (DEFAULT, DEFAULT, _view, _good, _book, _id);
         
       end $$;
-      """, 
-      (result.title, result.type.value, result.thumbnail, result.link, result.view, result.good, result.book)
+      """
     )
     self.conn.commit()
 
     cur.close()
+
+  def update(self, result: Result):
+    cur = self.conn.cursor()
+
+    cur.execute(
+      """
+      UPDATE "novel" SET 
+        "age_limit" = %s,
+        "author" = %s
+      WHERE "link" = %s;
+      """,
+      (result.age_limit, result.author, result.link)
+    )
+    self.conn.commit()
+
+    cur.close()
+
+  def renewal(self):
+    cur = self.conn.cursor()
+
+    cur.execute("select link from novel")
+    self.conn.commit()
+    result = [x[0] for x in cur.fetchall()]
+    
+    cur.close()
+
+    return result
+
 
   def close(self):
     self.conn.close()
   
 
 async def main():
-  parser = argparse.ArgumentParser(description="소설 통계 프로그램")
-
-  parser.add_argument("input", help="소설 제목 혹은 링크")
-
-  args = parser.parse_args()
-
-  result = await NovelStatic(args.input).search()
-
   db = DB()
+  novel = NovelStatic()
 
-  db.do(result)
+  for i in db.renewal():
+    print(i)
+    db.update(await novel.search(i))
 
   db.close()
   

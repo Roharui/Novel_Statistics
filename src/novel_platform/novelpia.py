@@ -50,7 +50,11 @@ class Novelpia(Platform):
     thumbnail_wrap = novel_content \
       .find("tr") \
       .find("td") \
-      .find("a")
+      .find("a") \
+      or \
+      novel_content \
+      .find("tr") \
+      .find("td")
 
     thumbnail = None
     if not thumbnail_wrap is None:
@@ -58,10 +62,21 @@ class Novelpia(Platform):
       .find("img")["src"] \
       .strip()
 
+    is_end = not not (novel_content.find("span", {"class" : "b_comp"}))
+
+    age_limit = 19 if novel_content.find("span", {"class" : "b_19"}) \
+      else 15 if novel_content.find("span", {"class" : "b_15"}) else 0
+
     title = novel_content \
       .find("tr") \
       .find_all("td")[1] \
       .find("span").text
+
+    author = novel_content \
+      .find("tr") \
+      .find_all("td")[1] \
+      .find_all("font")[1] \
+      .find("a").text
 
     number_text = [int(''.join(i for i in x if i.isdigit())) for x in number_data.replace(",", "").replace('\xa0', "").split(" ") if len(x)]
     view, book, good = number_text
@@ -73,5 +88,8 @@ class Novelpia(Platform):
       book=book,
       good=good,
       type=PlatformType.NOVELPIA,
-      link=url
+      link=url,
+      is_end=is_end,
+      age_limit=age_limit,
+      author=author
     )

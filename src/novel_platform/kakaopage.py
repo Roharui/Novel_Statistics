@@ -23,6 +23,10 @@ class Kakaopage(Platform):
 
     link = f"https://page.kakao.com/home?seriesId={novel_content['id']}"
 
+    age_limit = novel_content["age_grade"]
+    is_end = novel_content["pub_up"]
+    author = novel_content["author"]
+
     return Result(
       title=title,
       thumbnail=thumbnail,
@@ -30,7 +34,10 @@ class Kakaopage(Platform):
       book=book,
       good=good,
       type=PlatformType.KAKAOPAGE,
-      link=link
+      link=link,
+      is_end=is_end,
+      age_limit=age_limit,
+      author=author
     )
 
   # 소설 제목으로 검색

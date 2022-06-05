@@ -15,6 +15,9 @@ class Result:
     self.good: int = kwargs["good"]
     self.book: int = kwargs["book"]
     self.link: str = kwargs["link"]
+    self.author: str = kwargs["author"]
+    self.is_end: bool = kwargs["is_end"]
+    self.age_limit: int = kwargs["age_limit"]
     self.data = kwargs
 
   def __str__(self) -> str:
