@@ -56,12 +56,6 @@ class Novelpia(Platform):
       .find("tr") \
       .find("td")
 
-    print(
-      thumbnail_wrap \
-      .find("img")["src"] \
-      .strip()
-    )
-
     thumbnail = None
     if not thumbnail_wrap is None:
       thumbnail = "https:" + thumbnail_wrap \

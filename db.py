@@ -79,7 +79,7 @@ class DB:
             "title" = _title, 
             "thumbnail" = _thumbnail,
             "is_end" = _is_end,
-            "is_plus" = _is_plus,
+            "is_plus" = _is_plus
             WHERE "link" = _link;
         end if;
           
