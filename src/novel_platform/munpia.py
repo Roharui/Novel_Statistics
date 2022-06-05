@@ -49,6 +49,7 @@ class Munpia(Platform):
       .text.strip()
 
     is_end = not not (novel_content.find("span", {"class":"xui-finish"}))
+    is_plus = not not (novel_content.find("span", {"class":"xui-gold"}))
     
     age_limit = 0
 
@@ -69,6 +70,7 @@ class Munpia(Platform):
       type=PlatformType.MUNPIA,
       link=url,
       is_end=is_end,
+      is_plus=is_plus,
       age_limit=age_limit,
       author=author
     )

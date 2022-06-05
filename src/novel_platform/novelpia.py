@@ -56,13 +56,22 @@ class Novelpia(Platform):
       .find("tr") \
       .find("td")
 
+    print(
+      thumbnail_wrap \
+      .find("img")["src"] \
+      .strip()
+    )
+
     thumbnail = None
     if not thumbnail_wrap is None:
       thumbnail = "https:" + thumbnail_wrap \
       .find("img")["src"] \
       .strip()
 
+      thumbnail = None if thumbnail == "https://image.novelpia.com" else thumbnail
+
     is_end = not not (novel_content.find("span", {"class" : "b_comp"}))
+    is_plus = not not (novel_content.find("span", {"class" : "b_plus"}))
 
     age_limit = 19 if novel_content.find("span", {"class" : "b_19"}) \
       else 15 if novel_content.find("span", {"class" : "b_15"}) else 0
@@ -90,6 +99,7 @@ class Novelpia(Platform):
       type=PlatformType.NOVELPIA,
       link=url,
       is_end=is_end,
+      is_plus=is_plus,
       age_limit=age_limit,
       author=author
     )

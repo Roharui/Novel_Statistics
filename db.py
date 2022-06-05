@@ -1,6 +1,5 @@
 
 import os 
-import argparse
 import psycopg2
 import asyncio
 
@@ -36,6 +35,7 @@ class DB:
         _book int := '{result.book}';
 
         _is_end bool := {"true" if result.is_end else "false"};
+        _is_plus bool := {"true" if result.is_plus else "false"};
         _age_limit int := {result.age_limit};
         _author varchar := '{result.author}';
         
@@ -47,9 +47,20 @@ class DB:
         select title, thumbnail, id, is_end into _ori_title, _ori_thumbnail, _id, _ori_is_end from novel n where n.link = _link;
 
         if not exists (select 1 from novel n where n.link = _link) then
-          INSERT INTO "novel"("createdAt", "updatedAt", "title", "type", "thumbnail", "link", "is_end", "age_limit", "author") 
+          INSERT INTO "novel"(
+            "createdAt", 
+            "updatedAt", 
+            "title", 
+            "type", 
+            "thumbnail", 
+            "link", 
+            "is_end", 
+            "is_plus", 
+            "age_limit", 
+            "author"
+          ) 
           VALUES 
-          (DEFAULT, DEFAULT, _title, _type, _thumbnail, _link, _is_end, _age_limit, _author);
+          (DEFAULT, DEFAULT, _title, _type, _thumbnail, _link, _is_end, _is_plus, _age_limit, _author);
           select id into _id from novel n where n.link = _link;
         end if;
 
@@ -88,7 +99,7 @@ class DB:
 
     cur.close()
 
-  def renewal(self):
+  def getUrls(self):
     cur = self.conn.cursor()
 
     cur.execute("select link from novel")
@@ -108,7 +119,7 @@ async def main():
   db = DB()
   novel = NovelStatic()
 
-  for i in db.renewal():
+  for i in db.getUrls():
     print(i)
     db.update(await novel.search(i))
 

@@ -23,6 +23,8 @@ class Kakaopage(Platform):
 
     link = f"https://page.kakao.com/home?seriesId={novel_content['id']}"
 
+    is_plus = True
+
     age_limit = novel_content["age_grade"]
     is_end = novel_content["pub_up"]
     author = novel_content["author"]
@@ -36,6 +38,7 @@ class Kakaopage(Platform):
       type=PlatformType.KAKAOPAGE,
       link=link,
       is_end=is_end,
+      is_plus=is_plus,
       age_limit=age_limit,
       author=author
     )

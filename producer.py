@@ -1,30 +1,77 @@
 import asyncio
-import aio_pika
-import aio_pika.abc
+import json
+import uuid
+from typing import MutableMapping
+
+from aio_pika import Message, connect
+from aio_pika.abc import (
+  AbstractChannel, AbstractConnection, AbstractIncomingMessage, AbstractQueue,
+)
+
+from db import DB
 
 QUEUE = "novel.link"
 
-async def main(loop):
-  # Explicit type annotation
-  connection: aio_pika.RobustConnection = await aio_pika.connect_robust(
-      "amqp://guest:guest@127.0.0.1/", loop=loop
-  )
+class UpdateDBClient:
+  connection: AbstractConnection
+  channel: AbstractChannel
+  callback_queue: AbstractQueue
+  loop: asyncio.AbstractEventLoop
 
-  routing_key = QUEUE
+  def __init__(self) -> None:
+    self.futures: MutableMapping[str, asyncio.Future] = {}
+    self.loop = asyncio.get_running_loop()
 
-  channel: aio_pika.abc.AbstractChannel = await connection.channel()
+  async def connect(self) -> "UpdateDBClient":
+    self.connection = await connect(
+      "amqp://guest:guest@localhost/", loop=self.loop,
+    )
+    self.channel = await self.connection.channel()
+    self.callback_queue = await self.channel.declare_queue(exclusive=True)
+    await self.callback_queue.consume(self.on_response)
 
-  await channel.default_exchange.publish(
-      aio_pika.Message(
-          body='https://novelpia.com/novel/96189'.encode()
+    return self
+
+  def on_response(self, message: AbstractIncomingMessage) -> None:
+    if message.correlation_id is None:
+      print(f"Bad message {message!r}")
+      return
+
+    future: asyncio.Future = self.futures.pop(message.correlation_id)
+    future.set_result(message.body)
+
+  async def call(self, n: str):
+    body = json.dumps({"link": n})
+    correlation_id = str(uuid.uuid4())
+    future = self.loop.create_future()
+
+    self.futures[correlation_id] = future
+
+    await self.channel.default_exchange.publish(
+      Message(
+        body.encode(),
+        content_type="text/plain",
+        correlation_id=correlation_id,
+        reply_to=self.callback_queue.name,
       ),
-      routing_key=routing_key
-  )
+      routing_key=QUEUE,
+    )
 
-  await connection.close()
+    return await future
+
+
+async def main() -> None:
+
+  db = DB()
+  
+  links = db.getUrls()
+  rpc = await UpdateDBClient().connect()
+  
+  for link in links:
+    print(f" [x] Requesting... {link}")
+    response = await rpc.call(link)
+    print(f" [.] Got {response!r}")
 
 
 if __name__ == "__main__":
-  loop = asyncio.get_event_loop()
-  loop.run_until_complete(main(loop))
-  loop.close()
+  asyncio.run(main())
