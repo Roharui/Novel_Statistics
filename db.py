@@ -42,9 +42,14 @@ class DB:
         _ori_title varchar;
         _ori_thumbnail varchar;
         _ori_is_end bool;
+        _ori_is_plus bool;
         _id int;
       begin
-        select title, thumbnail, id, is_end into _ori_title, _ori_thumbnail, _id, _ori_is_end from novel n where n.link = _link;
+        select 
+          title, thumbnail, id, is_end, is_plus
+          into 
+          _ori_title, _ori_thumbnail, _id, _ori_is_end, _ori_is_plus
+        from novel n where n.link = _link;
 
         if not exists (select 1 from novel n where n.link = _link) then
           INSERT INTO "novel"(
@@ -64,11 +69,17 @@ class DB:
           select id into _id from novel n where n.link = _link;
         end if;
 
-        if _ori_title <> _title or _ori_thumbnail <> _thumbnail or _is_end <> _ori_is_end then 
+        if 
+        _ori_title <> _title or 
+        _ori_thumbnail <> _thumbnail or 
+        _is_end <> _ori_is_end or
+        _is_plus <> _ori_is_plus
+        then 
           UPDATE "novel" SET 
             "title" = _title, 
             "thumbnail" = _thumbnail,
-            "is_end" = _is_end
+            "is_end" = _is_end,
+            "is_plus" = _is_plus,
             WHERE "link" = _link;
         end if;
           
