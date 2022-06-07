@@ -75,8 +75,34 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
+  import argparse
+
+  parser = argparse.ArgumentParser(description="소설 통계 프로그램 컨슈머")
+
+  parser.add_argument("--env", required=False, default=".env", help="env 변수 파일 위치")
+  parser.add_argument("--now", required=False, default=False, help="바로 시작")
+  parser.add_argument("--start", required=False, default="0:00", help="프로그램 시작 시간")
+
+  args = parser.parse_args()
+
   from dotenv import load_dotenv
 
-  load_dotenv()
+  load_dotenv(
+    dotenv_path=args.env
+  )
 
-  asyncio.run(main())
+  if args.now:
+    asyncio.run(main())
+  else:
+    import aioschedule as schedule
+    from time import sleep
+
+    schedule.every().day.at(args.start).do(main)
+
+    loop = asyncio.get_event_loop()
+
+    print(f" [x] 실행되었습니다. 이 프로그램의 작동 시각은 [{args.start}] 입니다.")
+
+    while True:
+        loop.run_until_complete(schedule.run_pending())
+        sleep(0.1)

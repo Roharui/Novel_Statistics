@@ -1,6 +1,7 @@
 aio-pika==8.0.3
 aiohttp==3.8.1
 aiormq==6.3.3
+aioschedule==0.5.2
 aiosignal==1.2.0
 astroid==2.4.2
 async-timeout==4.0.2
