@@ -1,3 +1,5 @@
+import os
+
 import asyncio
 import json
 import logging
@@ -7,20 +9,19 @@ from typing import Dict, Union
 from aio_pika import Message, connect
 from aio_pika.abc import AbstractIncomingMessage
 
-from src import NovelStatic
+from src import NovelStatic, WrongLinkException, WrongPageException
 from db import DB
-from src.exception.wrong_link_exception import WrongLinkException
-from src.exception.wrong_page_exception import WrongPageException
 
 QUEUE = "novel.link"
 
 crawler = NovelStatic(only_link=True)
 
-db = DB()
+db = None
 
 async def main() -> None:
+
   # Perform connection
-  connection = await connect("amqp://guest:guest@localhost/")
+  connection = await connect(os.environ.get("MQ_URL"))
 
   # Creating a channel
   channel = await connection.channel()
@@ -102,4 +103,20 @@ async def do(request: Dict[str, str]) -> Dict[str, Union[int, str, None]]:
 
 
 if __name__ == "__main__":
+  import argparse
+
+  parser = argparse.ArgumentParser(description="소설 통계 프로그램 컨슈머")
+
+  parser.add_argument("--env", required=False, default=".env", help="env 변수 파일 위치")
+
+  args = parser.parse_args()
+
+  from dotenv import load_dotenv
+
+  load_dotenv(
+    dotenv_path=args.env
+  )
+
+  db = DB(os.environ.get("DB_URL"))
+
   asyncio.run(main())

@@ -1,23 +1,12 @@
 
-import os 
 import psycopg2
 import asyncio
 
 from src import NovelStatic, Result
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
 class DB:
-  def __init__(self) -> None:
-    self.conn = psycopg2.connect(
-      host=os.environ.get("host"), 
-      dbname=os.environ.get("dbname"), 
-      user=os.environ.get("user"), 
-      password=os.environ.get("password"), 
-      port=os.environ.get("port")
-    )
+  def __init__(self, db_url) -> None:
+    self.conn = psycopg2.connect(db_url)
 
   def do(self, result: Result) -> None:
     cur = self.conn.cursor()
@@ -127,7 +116,7 @@ class DB:
   
 
 async def main():
-  db = DB()
+  db = DB("postgres://novel:novelnovelnovelnovel@localhost:5432/novel")
   novel = NovelStatic()
 
   for i in db.getUrls():

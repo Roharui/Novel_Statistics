@@ -1,3 +1,5 @@
+import os
+
 import asyncio
 import json
 import uuid
@@ -11,7 +13,6 @@ from aio_pika.abc import (
 from db import DB
 
 QUEUE = "novel.link"
-
 class UpdateDBClient:
   connection: AbstractConnection
   channel: AbstractChannel
@@ -24,7 +25,7 @@ class UpdateDBClient:
 
   async def connect(self) -> "UpdateDBClient":
     self.connection = await connect(
-      "amqp://guest:guest@localhost/", loop=self.loop,
+      os.environ.get("MQ_URL"), loop=self.loop,
     )
     self.channel = await self.connection.channel()
     self.callback_queue = await self.channel.declare_queue(exclusive=True)
@@ -62,7 +63,7 @@ class UpdateDBClient:
 
 async def main() -> None:
 
-  db = DB()
+  db = DB(os.environ.get("DB_URL"))
   
   links = db.getUrls()
   rpc = await UpdateDBClient().connect()
@@ -74,4 +75,8 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
+  from dotenv import load_dotenv
+
+  load_dotenv()
+
   asyncio.run(main())
