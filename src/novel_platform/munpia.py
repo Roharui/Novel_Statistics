@@ -43,10 +43,14 @@ class Munpia(Platform):
     except AttributeError as e:
       raise WrongPageException
 
-    author = novel_content.find("dl", {"class":"meta-author meta"}) \
-      .find("dd") \
-      .find("a") \
-      .text.strip()
+    author = (
+        novel_content.find("dl", {"class":"meta-author meta"}) \
+        .find("dd") \
+        .find("a")
+        or
+        novel_content.find("dl", {"class":"meta-author meta"}) \
+        .find("dd") \
+      ).text.strip()
 
     is_end = not not (novel_content.find("span", {"class":"xui-finish"}))
     is_plus = not not (novel_content.find("span", {"class":"xui-gold"}))

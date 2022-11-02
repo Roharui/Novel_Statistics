@@ -1,25 +1,19 @@
-import argparse
 import asyncio
 
 from typing import Dict, List, Union
 from urllib.parse import urlparse
 from validators import url
 
-from .exception import WrongLinkException
-from .novel_platform import Result, Novelpia, Munpia, Kakaopage, Platform
+from src.exception import WrongLinkException
+from src.novel_platform import Result, Novelpia, Munpia, Kakaopage, Platform
 
 from itertools import chain
-
-import sys
-
-py_ver = int(f"{sys.version_info.major}{sys.version_info.minor}")
-if py_ver > 37 and sys.platform.startswith('win'):
-  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 PLATFORM: Dict[str, Platform] = {
   "novelpia.com" : Novelpia(),
   "novel.munpia.com": Munpia(),
-  "page.kakao.com": Kakaopage()
+  # 현재 카카오페이지가 graphQL을 사용합니다.
+  # "page.kakao.com": Kakaopage()
 }
 
 class NovelStatic:
@@ -54,19 +48,3 @@ class NovelStatic:
 
       return await engin.searchURL(self.url)
 
-async def main():
-  parser = argparse.ArgumentParser(description="소설 통계 프로그램")
-
-  parser.add_argument("input", help="소설 제목 혹은 링크")
-
-  args = parser.parse_args()
-
-  result = await NovelStatic().search(args.input)
-
-  if type(result) == list:
-    for i in result: print(i)
-  else:
-    print(result)
-  
-if __name__ == '__main__':
-  asyncio.run(main())

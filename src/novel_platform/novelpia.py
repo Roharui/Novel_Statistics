@@ -4,7 +4,7 @@ import json
 from typing import Final, List
 from urllib import parse
 
-from src.exception.wrong_page_exception import WrongPageException
+from src.exception import WrongPageException
 
 
 from .novel_platform import Platform
