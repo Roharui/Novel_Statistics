@@ -104,5 +104,5 @@ if __name__ == "__main__":
     print(f" [x] 실행되었습니다. 이 프로그램의 작동 시각은 [{args.start}] 입니다.")
 
     while True:
-        loop.run_until_complete(schedule.run_pending())
-        sleep(0.1)
+      loop.run_until_complete(schedule.run_pending())
+      sleep(0.1)

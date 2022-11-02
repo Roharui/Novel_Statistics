@@ -32,6 +32,7 @@ class DB:
         _ori_thumbnail varchar;
         _ori_is_end bool;
         _ori_is_plus bool;
+        _ori_age_limit int;
         _id int;
       begin
         select 
@@ -62,13 +63,15 @@ class DB:
         _ori_title <> _title or 
         _ori_thumbnail <> _thumbnail or 
         _is_end <> _ori_is_end or
-        _is_plus <> _ori_is_plus
+        _is_plus <> _ori_is_plus or
+        _age_limit <> _ori_age_limit
         then 
           UPDATE "novel" SET 
             "title" = _title, 
             "thumbnail" = _thumbnail,
             "is_end" = _is_end,
             "is_plus" = _is_plus
+            "age_limit" = _age_limit
             WHERE "link" = _link;
         end if;
           
@@ -116,11 +119,24 @@ class DB:
   
 
 async def main():
-  db = DB("postgres://novel:novelnovelnovelnovel@localhost:5432/novel")
+  from dotenv import load_dotenv
+  import argparse
+  import os
+
+  parser = argparse.ArgumentParser(description="소설 통계 DB 저장")
+
+  parser.add_argument("--env", required=False, default=".env", help="env 변수 파일 위치")
+
+  args = parser.parse_args()
+
+  load_dotenv(
+    dotenv_path=args.env
+  )
+
+  db = DB(os.environ.get("DB_URL"))
   novel = NovelStatic()
 
   for i in db.getUrls():
-    print(i)
     db.update(await novel.search(i))
 
   db.close()
