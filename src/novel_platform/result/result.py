@@ -1,5 +1,5 @@
 
-from enum import Enum, auto
+from enum import Enum
 
 class PlatformType(Enum):
   NOVELPIA="novelpia"
@@ -22,4 +22,7 @@ class Result:
     self.data = kwargs
 
   def __str__(self) -> str:
+    return str(self.data)
+
+  def __repr__(self) -> str:
     return str(self.data)
