@@ -12,8 +12,7 @@ from itertools import chain
 PLATFORM: Dict[str, Platform] = {
   "novelpia.com" : Novelpia(),
   "novel.munpia.com": Munpia(),
-  # 현재 카카오페이지가 graphQL을 사용합니다.
-  # "page.kakao.com": Kakaopage()
+  "page.kakao.com": Kakaopage()
 }
 
 class NovelStatic:
