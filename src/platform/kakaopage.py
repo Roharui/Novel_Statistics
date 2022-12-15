@@ -5,7 +5,7 @@ from urllib import parse
 
 from src.exception.wrong_page_exception import WrongPageException
 
-from .novel_platform import Platform
+from .platform import Platform
 from .result import Result, PlatformType
 
 TITLE_QUERY: Final[str] = """

@@ -27,20 +27,18 @@ async def safe_publish(channel, item: Novel):
         return await publish(channel, item)
 
 async def main() -> None:
-  try:
-    connection = await aio_pika.connect(os.environ.get("MQ_URL"))
+  print(f" [x] 소설 크롤링 프로듀서가 실행되었습니다. 이 프로그램의 작동 시각은 [{args.start}] 입니다.")
+  connection = await aio_pika.connect(os.environ.get("MQ_URL"))
 
-    async with connection:
-      channel = await connection.channel()
+  async with connection:
+    channel = await connection.channel()
 
-      p = [
-        safe_publish(channel, item) for item in 
-        session.query(Novel).filter(Novel.is_able == True).all()
-      ]
+    p = [
+      safe_publish(channel, item) for item in 
+      session.query(Novel).filter(Novel.is_able == True).all()
+    ]
 
-      await asyncio.gather(*p)
-  except KeyboardInterrupt:
-    exit(0)
+    await asyncio.gather(*p)
 
 
 if __name__ == "__main__":
@@ -63,8 +61,6 @@ if __name__ == "__main__":
 
     loop = asyncio.get_event_loop()
 
-    print(f" [x] 소설 크롤링 프로듀서가 실행되었습니다. 이 프로그램의 작동 시각은 [{args.start}] 입니다.")
-    
     while True:
       loop.run_until_complete(schedule.run_pending())
       sleep(0.1)

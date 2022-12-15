@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 from validators import url
 
 from src.exception.wrong_page_exception import WrongPageException
-from src.novel_platform import Result, Novelpia, Munpia, Kakaopage, Platform
+from src.platform import Result, Novelpia, Munpia, Kakaopage, Platform
 
 from itertools import chain
 

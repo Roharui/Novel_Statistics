@@ -15,7 +15,7 @@ from sqlalchemy import (
 from sqlalchemy.sql import expression
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship
 
-from src.novel_platform.result import PlatformType
+from src.platform.result import PlatformType
 
 __all__ = ["Novel", "NovelInfo", "session"]
 

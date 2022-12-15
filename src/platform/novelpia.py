@@ -6,7 +6,7 @@ from urllib import parse
 
 from src.exception import WrongPageException
 
-from .novel_platform import Platform
+from .platform import Platform
 from .result import Result, PlatformType
 
 class Novelpia(Platform):

@@ -10,10 +10,12 @@ import platform
 if platform.system()=='Windows':
   asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
+from datetime import datetime
+
 from src import NovelStatic
 from db import session, Novel
 
-from src.novel_platform.result import Result
+from src.platform import Result
 
 app = NovelStatic()
 
@@ -35,34 +37,33 @@ def updateDB(_id: int, item: Result):
   session.query(Novel).filter(Novel.id == _id).update(data)
 
 async def main():
-  try:
-    result = await app.searchRecentLink()
+  print(f" [x] 소설 크롤링 봇이 실행되었습니다. 이 프로그램의 작동 주기는 [{args.start}]분 입니다.")
+  result = await app.searchRecentLink()
 
-    print("=== 소설 추가 시작 ==")
-    for i in result:
+  print(f"=== 소설 추가 시작 ===")
+  print(f"{datetime.now()}")
+  for i in result:
 
-      print(f"{i} - 검색 시작")
+    print(f"{i} - 검색 시작")
 
-      _id = session.query(Novel.id).filter(Novel.link == i).scalar()
-      item = await app.search(i)
+    _id = session.query(Novel.id).filter(Novel.link == i).scalar()
+    item = await app.search(i)
 
-      if item == None:
-        print(f"{i} - 생략됨")
-        continue
+    if item == None:
+      print(f"{i} - 생략됨")
+      continue
 
-      if _id == None:
-        print(f"{i} - DB 주입중")
-        insertDB(item)
+    if _id == None:
+      print(f"{i} - DB 주입중")
+      insertDB(item)
 
-      else:
-        print(f"{i} - DB 수정중")
-        updateDB(_id, item)
+    else:
+      print(f"{i} - DB 수정중")
+      updateDB(_id, item)
 
-    print("=== 소설 추가 완료 ==")
+  print("=== 소설 추가 완료 ===")
 
-    session.commit()
-  except KeyboardInterrupt:
-    exit(0)
+  session.commit()
 
 
 async def doNow(_input: str):
@@ -96,8 +97,6 @@ if __name__ == '__main__':
     schedule.every(args.start).minutes.do(main)
 
     loop = asyncio.get_event_loop()
-
-    print(f" [x] 소설 크롤링 봇이 실행되었습니다. 이 프로그램의 작동 주기는 [{args.start}]분 입니다.")
 
     while True:
       loop.run_until_complete(schedule.run_pending())

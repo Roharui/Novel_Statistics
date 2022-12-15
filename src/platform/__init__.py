@@ -1,4 +1,4 @@
-from .novel_platform import Platform
+from .platform import Platform
 from .novelpia import Novelpia
 from .munpia import Munpia
 from .kakaopage import Kakaopage

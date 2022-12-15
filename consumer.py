@@ -15,7 +15,7 @@ if platform.system()=='Windows':
   asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 from src.app import NovelStatic
-from src.novel_platform.result import Result
+from src.platform.result import Result
 from db import session, Novel, NovelInfo
 
 app = NovelStatic(only_link=True)
