@@ -10,8 +10,9 @@ from sqlalchemy import (
   TIMESTAMP, 
   Boolean, 
   ForeignKey, 
-  func
+  func,
 )
+from sqlalchemy.sql import expression
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship
 
 from src.novel_platform.result import PlatformType
@@ -38,9 +39,10 @@ class Novel(Base):
   thumbnail = Column(String)
   link = Column(String, nullable=False)
   author = Column(String, nullable=False)
-  is_end = Column(Boolean, default=False)
-  is_plus = Column(Boolean, default=False)
+  is_end = Column(Boolean, server_default=expression.false(), default=True)
+  is_plus = Column(Boolean, server_default=expression.false(), default=True)
   age_limit = Column(Integer, nullable=False)
+  is_able = Column(Boolean, server_default=expression.false(), default=True)
 
 
 class NovelInfo(Base):

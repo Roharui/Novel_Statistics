@@ -49,45 +49,46 @@ class Novelpia(Platform):
     try:
       novel_content = content.find("div", {"class":"mobile_hidden s_inv"}).find("div").find("table")
       number_data = novel_content.find_all("tr")[2].find("div").find("font").text
+
+      thumbnail_wrap = novel_content \
+        .find("tr") \
+        .find("td") \
+        .find("a") \
+        or \
+        novel_content \
+        .find("tr") \
+        .find("td")
+
+      thumbnail = None
+      if not thumbnail_wrap is None:
+        thumbnail = "https:" + thumbnail_wrap \
+        .find("img")["src"] \
+        .strip()
+
+        thumbnail = None if thumbnail == "https://image.novelpia.com" else thumbnail
+
+      is_end = not not (novel_content.find("span", {"class" : "b_comp"}))
+      is_plus = not not (novel_content.find("span", {"class" : "b_plus"}))
+
+      age_limit = 19 if novel_content.find("span", {"class" : "b_19"}) \
+        else 15 if novel_content.find("span", {"class" : "b_15"}) else 0
+
+      title = novel_content \
+        .find("tr") \
+        .find_all("td")[1] \
+        .find("span").text
+
+      author = novel_content \
+        .find("tr") \
+        .find_all("td")[1] \
+        .find_all("font")[1] \
+        .find("a").text
+
+      number_text = [int(''.join(i for i in x if i.isdigit())) for x in number_data.replace(",", "").replace('\xa0', "").split(" ") if len(x)]
+      view, book, good = number_text
+
     except AttributeError as e:
       raise WrongPageException
-
-    thumbnail_wrap = novel_content \
-      .find("tr") \
-      .find("td") \
-      .find("a") \
-      or \
-      novel_content \
-      .find("tr") \
-      .find("td")
-
-    thumbnail = None
-    if not thumbnail_wrap is None:
-      thumbnail = "https:" + thumbnail_wrap \
-      .find("img")["src"] \
-      .strip()
-
-      thumbnail = None if thumbnail == "https://image.novelpia.com" else thumbnail
-
-    is_end = not not (novel_content.find("span", {"class" : "b_comp"}))
-    is_plus = not not (novel_content.find("span", {"class" : "b_plus"}))
-
-    age_limit = 19 if novel_content.find("span", {"class" : "b_19"}) \
-      else 15 if novel_content.find("span", {"class" : "b_15"}) else 0
-
-    title = novel_content \
-      .find("tr") \
-      .find_all("td")[1] \
-      .find("span").text
-
-    author = novel_content \
-      .find("tr") \
-      .find_all("td")[1] \
-      .find_all("font")[1] \
-      .find("a").text
-
-    number_text = [int(''.join(i for i in x if i.isdigit())) for x in number_data.replace(",", "").replace('\xa0', "").split(" ") if len(x)]
-    view, book, good = number_text
 
     return Result(
       title=title,

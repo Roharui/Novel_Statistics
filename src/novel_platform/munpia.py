@@ -40,30 +40,31 @@ class Munpia(Platform):
         .find("div", {"class": "dt cover-box"}) \
         .find("img")["src"] \
         .strip()
+
+      author = (
+          novel_content.find("dl", {"class":"meta-author meta"}) \
+          .find("dd") \
+          .find("a")
+          or
+          novel_content.find("dl", {"class":"meta-author meta"}) \
+          .find("dd") \
+        ).text.strip()
+
+      is_end = not not (novel_content.find("span", {"class":"xui-finish"}))
+      is_plus = not not (novel_content.find("span", {"class":"xui-gold"}))
+      
+      age_limit = 0
+
+      title = content.find("title").text.split(" « ")[0]
+
+      number_text = novel_content.find_all("dl", {"class":"meta-etc meta"})[1].text
+      number_list_1 = [''.join(i for i in x if i.isdigit()) for x in number_text.split("\n")]
+      number_list_2 = [int(x) for x in number_list_1 if len(x)]
+      
+      book, view, good, _ = number_list_2
+      
     except AttributeError as e:
       raise WrongPageException
-
-    author = (
-        novel_content.find("dl", {"class":"meta-author meta"}) \
-        .find("dd") \
-        .find("a")
-        or
-        novel_content.find("dl", {"class":"meta-author meta"}) \
-        .find("dd") \
-      ).text.strip()
-
-    is_end = not not (novel_content.find("span", {"class":"xui-finish"}))
-    is_plus = not not (novel_content.find("span", {"class":"xui-gold"}))
-    
-    age_limit = 0
-
-    title = content.find("title").text.split(" « ")[0]
-
-    number_text = novel_content.find_all("dl", {"class":"meta-etc meta"})[1].text
-    number_list_1 = [''.join(i for i in x if i.isdigit()) for x in number_text.split("\n")]
-    number_list_2 = [int(x) for x in number_list_1 if len(x)]
-    
-    book, view, good, _ = number_list_2
 
     return Result(
       title=title,

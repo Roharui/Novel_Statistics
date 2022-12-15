@@ -33,10 +33,13 @@ async def main() -> None:
     async with connection:
       channel = await connection.channel()
 
-      p = [safe_publish(channel, item) for item in session.query(Novel).all()]
+      p = [
+        safe_publish(channel, item) for item in 
+        session.query(Novel).filter(Novel.is_able == True).all()
+      ]
 
       await asyncio.gather(*p)
-  except KeyboardInterrupt as e:
+  except KeyboardInterrupt:
     exit(0)
 
 

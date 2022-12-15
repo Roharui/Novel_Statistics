@@ -3,7 +3,7 @@
 
 통계기능은 따로 작업이 필요할 것.
 
-TODO 검색 불가 문제가 존재
+TODO 19금 검색 불가 문제가 존재
 '''
 
 from typing import Final, List

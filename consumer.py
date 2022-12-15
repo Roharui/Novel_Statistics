@@ -26,22 +26,32 @@ async def addInfo(message: bytes):
 
   result: Result = await app.search(_link)
 
-  print(f"[{_id}] - \"{result.title}\"")
+  if result == None:
+    print(f"[{_id}] - \"{result.title}\" (미사용으로 전환)")
+    session.query(Novel).filter(
+      Novel.id == _id
+    ).update({
+      "is_able": False
+    })
 
-  session.query(Novel).filter(
-    Novel.id == _id
-  ).update({
-    "title": result.title,
-    "thumbnail": result.thumbnail,
-    "is_end": result.is_end,
-    "is_plus": result.is_plus,
-    "age_limit": result.age_limit,
-  })
+  else:
+    print(f"[{_id}] - \"{result.title}\"")
 
-  info = NovelInfo(view=result.view, good=result.good, book=result.book, novel_id=_id)
-  session.add(info)
-  
+    session.query(Novel).filter(
+      Novel.id == _id
+    ).update({
+      "title": result.title,
+      "thumbnail": result.thumbnail,
+      "is_end": result.is_end,
+      "is_plus": result.is_plus,
+      "age_limit": result.age_limit,
+    })
+
+    info = NovelInfo(view=result.view, good=result.good, book=result.book, novel_id=_id)
+    session.add(info)
+          
   session.commit()
+
 
 async def main() -> None:
   connection = await aio_pika.connect_robust(

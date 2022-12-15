@@ -4,7 +4,7 @@ from typing import Dict, List, Union
 from urllib.parse import urlparse
 from validators import url
 
-from src.exception import WrongLinkException
+from src.exception.wrong_page_exception import WrongPageException
 from src.novel_platform import Result, Novelpia, Munpia, Kakaopage, Platform
 
 from itertools import chain
@@ -20,7 +20,6 @@ class NovelStatic:
     self.only_link = only_link
 
   async def search(self, __input: str) -> Union[Result, List[Result]]:
-
     self.title = None
     self.url = None
 
@@ -32,20 +31,30 @@ class NovelStatic:
     # 이름 일 경우
     if self.title:
       if self.only_link:
-        return None
-      coroutine = await asyncio.gather(*[engin.searchTitle(self.title) for engin in PLATFORM.values()])
-      result = await asyncio.gather(*chain(*coroutine))
-      return result
+        return []
+      try:
+        coroutine = await asyncio.gather(*[engin.searchTitle(self.title) for engin in PLATFORM.values()])
+        result = await asyncio.gather(*chain(*coroutine))
+        return result
+      except WrongPageException:
+        print("잘못된 페이지입니다.")
+        return []
     # 링크일 경우
     else:
       host = urlparse(self.url).hostname
 
       if not host in PLATFORM.keys():
-        raise WrongLinkException()
+        print("잘못된 링크입니다.")
+        return None
       
       engin: Platform = PLATFORM[host]
 
-      return await engin.searchURL(self.url)
+      try:
+        return await engin.searchURL(self.url)
+      except WrongPageException:
+        print("잘못된 페이지입니다.")
+        return None
+    
 
   async def searchRecentLink(self):
     # 현재로써는 노벨피아만 작동 시킴, 후일 문피아와 카카오페이지도 추가할것.

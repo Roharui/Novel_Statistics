@@ -46,6 +46,10 @@ async def main():
       _id = session.query(Novel.id).filter(Novel.link == i).scalar()
       item = await app.search(i)
 
+      if item == None:
+        print(f"{i} - 생략됨")
+        continue
+
       if _id == None:
         print(f"{i} - DB 주입중")
         insertDB(item)
