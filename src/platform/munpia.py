@@ -6,7 +6,7 @@ from urllib import parse
 
 from src.exception.wrong_page_exception import WrongPageException
 
-from .platform import Platform
+from .novel_platform import Platform
 from .result import Result, PlatformType
 
 class Munpia(Platform):

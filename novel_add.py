@@ -37,7 +37,6 @@ def updateDB(_id: int, item: Result):
   session.query(Novel).filter(Novel.id == _id).update(data)
 
 async def main():
-  print(f" [x] 소설 크롤링 봇이 실행되었습니다. 이 프로그램의 작동 주기는 [{args.start}]분 입니다.")
   result = await app.searchRecentLink()
 
   print(f"=== 소설 추가 시작 ===")
@@ -54,11 +53,9 @@ async def main():
       continue
 
     if _id == None:
-      print(f"{i} - DB 주입중")
       insertDB(item)
 
     else:
-      print(f"{i} - DB 수정중")
       updateDB(_id, item)
 
   print("=== 소설 추가 완료 ===")
@@ -97,6 +94,8 @@ if __name__ == '__main__':
     schedule.every(args.start).minutes.do(main)
 
     loop = asyncio.get_event_loop()
+    
+    print(f" [x] 소설 크롤링 봇이 실행되었습니다. 이 프로그램의 작동 주기는 [{args.start}]분 입니다.")
 
     while True:
       loop.run_until_complete(schedule.run_pending())
