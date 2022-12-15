@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+
 load_dotenv()
 
 import os
@@ -11,7 +12,7 @@ import asyncio
 import platform
 
 if platform.system()=='Windows':
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+  asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 from src.app import NovelStatic
 from src.novel_platform.result import Result
@@ -43,10 +44,6 @@ async def addInfo(message: bytes):
   session.commit()
 
 async def main() -> None:
-  logging.basicConfig(level=logging.WARNING)
-
-  print("== Novel Info Consumer Start ==")
-
   connection = await aio_pika.connect_robust(
     os.environ.get("MQ_URL"),
   )
@@ -69,4 +66,10 @@ async def main() -> None:
           await addInfo(message.body)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+  logging.basicConfig(level=logging.WARNING)
+  
+  print(f" [x] 소설 크롤링 컨슈머가 실행되었습니다.")
+
+  loop = asyncio.get_event_loop()
+
+  loop.run_until_complete(main())

@@ -1,11 +1,10 @@
 import json
 
 
-from typing import Final, List
+from typing import Final, List, Union
 from urllib import parse
 
 from src.exception import WrongPageException
-
 
 from .novel_platform import Platform
 from .result import Result, PlatformType
@@ -15,13 +14,22 @@ class Novelpia(Platform):
     super().__init__()
     self.SEARCHLINK: Final[str] =  "https://novelpia.com/proc"
     self.NOVELLINK: Final[str] = "https://novelpia.com/novel"
+    self.PLUSLINK: Final[str] = "https://novelpia.com/plus"
 
   def __searchURL(self, word: str) -> str:
     word = parse.quote(word)
     return f"{self.SEARCHLINK}/novelsearch/{word}"
 
-  def __novelURL(self, num: int) -> str:
+  def __novelURL(self, num: Union[int, str]) -> str:
     return f"{self.NOVELLINK}/{num}"
+
+  async def searchRecentLink(self) -> List[str]:
+    content = await self._getContentParser(self.PLUSLINK)
+
+    return [
+      self.__novelURL(next(filter(lambda a: a.find("novel_") >= 0, item["class"])).split("_")[-1])
+      for item in content.find_all("div", {"class": "novelbox"})
+    ]
 
   # 소설 제목으로 검색
   async def searchTitle(self, title: str) -> List[Result]:
@@ -37,9 +45,6 @@ class Novelpia(Platform):
   # 소설 링크로 검색
   async def searchURL(self, url: str) -> Result:
     content = await self._getContentParser(url)
-
-    novel_content = None
-    number_data = None
 
     try:
       novel_content = content.find("div", {"class":"mobile_hidden s_inv"}).find("div").find("table")

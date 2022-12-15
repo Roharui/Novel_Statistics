@@ -2,9 +2,11 @@
 소설 검색의 베이스
 
 통계기능은 따로 작업이 필요할 것.
+
+TODO 검색 불가 문제가 존재
 '''
 
-from typing import Final
+from typing import Final, List
 from bs4 import BeautifulSoup
 from aiohttp import ClientSession
 
@@ -47,9 +49,13 @@ class Platform:
   async def _getContentParser(self, link: str) -> BeautifulSoup:
     return BeautifulSoup(await self._getContent(link), "html.parser")
 
+  # 최근 소설 검색
+  def searchRecentLink(self) -> List[str]:
+    return ["TEST"]
+
   # 소설 제목으로 검색
-  def searchTitle(self, title: str) -> Result:
-    return Result()
+  def searchTitle(self, title: str) -> List[Result]:
+    return [Result()]
 
   # 소설 링크로 검색
   def searchURL(self, url: str) -> Result:
