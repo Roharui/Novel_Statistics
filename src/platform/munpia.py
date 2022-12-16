@@ -1,7 +1,7 @@
 import json
 
 
-from typing import Final
+from typing import Final, List
 from urllib import parse
 
 from src.exception.wrong_page_exception import WrongPageException
@@ -13,10 +13,21 @@ class Munpia(Platform):
   def __init__(self) -> None:
     super().__init__()
     self.SEARCHLINK: Final[str] =  "https://novel.munpia.com/page/novelous/keyword"
+    self.RECENTLINK: Final[str] =  "https://novel.munpia.com/page/hd.platinum/group/pl.serial/exclusive/true/view/allend"
 
   def __searchURL(self, word: str) -> str:
     word = parse.quote(word)
     return f"{self.SEARCHLINK}/{word}/order/search_result"
+  
+  async def searchRecentLink(self) -> List[str]:
+    content = await self._getContentParser(self.RECENTLINK)
+
+    section = content.find("section", {"class":"ns-list"})
+    lst = section.find_all("li", {"class":"mi"})
+
+    result = [x.find("a", {"class":"title"})["href"] for x in lst]
+
+    return result
 
   # 소설 제목으로 검색
   async def searchTitle(self, title: str) -> Result:
@@ -31,11 +42,12 @@ class Munpia(Platform):
   # 소설 링크로 검색
   async def searchURL(self, url: str) -> Result:
     content = await self._getContentParser(url)
-    novel_content = content.find("div", {"class":"novel-info"})
-
-    thumbnail = None
-
+    
     try:
+      novel_content = content.find("div", {"class":"novel-info"})
+
+      thumbnail = None
+
       thumbnail = "https:" + novel_content \
         .find("div", {"class": "dt cover-box"}) \
         .find("img")["src"] \

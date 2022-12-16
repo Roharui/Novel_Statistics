@@ -10,7 +10,7 @@ from typing import Final, List
 from bs4 import BeautifulSoup
 from aiohttp import ClientSession
 
-from .result import Result
+from .result import Result, Episode
 
 GET_HEADER: Final[dict] = {
   'User-Agent': ('Mozilla/5.0 (Windows NT 10.0;Win64; x64)\
@@ -20,6 +20,10 @@ GET_HEADER: Final[dict] = {
 
 POST_HEADER: Final[dict] = {
   "Content-Type": "application/json",
+}
+
+POST_HEADER_FORM: Final[dict] = {
+  "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
 }
 
 class Platform:
@@ -37,17 +41,25 @@ class Platform:
     
     return result
 
-  async def _postContent(self, link: str, data: str) -> bytes:
+  async def _postContent(self, link: str, data: str, json: bool = True) -> bytes:
     result = None
+    header = POST_HEADER if json else POST_HEADER_FORM
 
     async with ClientSession() as session:
-      async with session.post(link, data=data, headers=POST_HEADER) as response:
+      async with session.post(link, data=data, headers=header) as response:
         result = await response.text()
     
     return result
 
   async def _getContentParser(self, link: str) -> BeautifulSoup:
     return BeautifulSoup(await self._getContent(link), "html.parser")
+
+  async def _postContentParser(self, link: str, data: str, json: bool = True) -> BeautifulSoup:
+    return BeautifulSoup(await self._postContent(link, data, json), "html.parser")
+
+  # 최근 소설 검색
+  def searchEpisode(self, link: str) -> List[Episode]:
+    return [Episode()]
 
   # 최근 소설 검색
   def searchRecentLink(self) -> List[str]:

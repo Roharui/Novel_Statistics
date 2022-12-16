@@ -26,3 +26,20 @@ class Result:
 
   def __repr__(self) -> str:
     return str(self.data)
+
+class Episode:
+  def __init__(self, **kwargs) -> None:
+    self.idx: int = kwargs["idx"]
+    self.title: str = kwargs["title"]
+    self.word_size: str = kwargs["word_size"]
+    self.view: int = kwargs["view"]
+    self.good: int = kwargs["good"]
+    self.comment: int = kwargs["comment"]
+    self.date: str = kwargs["date"]
+    self.data = kwargs
+
+  def __str__(self) -> str:
+    return str(self.data)
+
+  def __repr__(self) -> str:
+    return str(self.data)

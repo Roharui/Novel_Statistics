@@ -1,5 +1,5 @@
 import json
-
+import datetime
 
 from typing import Final, List, Union
 from urllib import parse
@@ -7,7 +7,7 @@ from urllib import parse
 from src.exception import WrongPageException
 
 from .novel_platform import Platform
-from .result import Result, PlatformType
+from .result import Result, PlatformType, Episode
 
 class Novelpia(Platform):
   def __init__(self) -> None:
@@ -15,6 +15,7 @@ class Novelpia(Platform):
     self.SEARCHLINK: Final[str] =  "https://novelpia.com/proc"
     self.NOVELLINK: Final[str] = "https://novelpia.com/novel"
     self.PLUSLINK: Final[str] = "https://novelpia.com/plus"
+    self.EPSODELINK: Final[str] = "https://novelpia.com/proc/episode_list"
 
   def __searchURL(self, word: str) -> str:
     word = parse.quote(word)
@@ -22,6 +23,83 @@ class Novelpia(Platform):
 
   def __novelURL(self, num: Union[int, str]) -> str:
     return f"{self.NOVELLINK}/{num}"
+
+    # 소설 링크로 검색
+  async def searchEpisode(self, url: str) -> List[Episode]:
+    novel_no = url.split("/")[-1]
+    page = 0
+
+    result = []
+
+    while True:
+      try:
+        content = await self._postContentParser(self.EPSODELINK, f"novel_no={novel_no}&page={page}", json=False)
+
+        epLst = content.find_all("tr", {"class":"ep_style5"})
+
+        for ep in epLst:
+
+          _, td2, td3 = ep.find_all("td")
+
+          td2.find("span").extract()
+
+          title = td2.find("b").text.strip()
+          td2.find("b").extract()
+
+          idx = len(result) + 1
+
+          td2.find("span").extract()
+
+          number_text = [
+            int(''.join(i for i in x if i.isdigit())) for x in 
+            td2.text.replace(",", "").replace('\xa0', "").split(" ")
+            if len(x.strip()) 
+          ]
+
+          if len(number_text) == 1:
+            word_size = number_text[0]
+            view, comment, good = [0,0,0]
+          else:
+            word_size, view, comment, good = number_text
+
+          cur_date = datetime.datetime.now()
+
+          if td3.text.find("전") >= 0:
+            date = str(datetime.datetime(cur_date.year, cur_date.month, cur_date.day))
+          else:
+            date_info = [int(x) for x in td3.text.split(".")]
+
+            if len(date_info) < 3:
+              date_info.insert(0, cur_date.year)
+
+            date = str(datetime.datetime(*date_info))
+
+          result.append(
+            Episode(
+              idx=idx,
+              title=title,
+              word_size=str(word_size),
+              view=view,
+              comment=comment,
+              good=good,
+              date=date,
+            )
+          )
+
+        page += 1
+
+        nxtPage = content.find_all("li", {"class":"page-item"})
+
+        pLst = [int(p.find("div", {"class":"page-link"}).text) for p in nxtPage[1:-1]]
+
+        if not page in pLst:
+          break
+
+      except Exception as e:
+        raise WrongPageException
+
+    return result
+
 
   async def searchRecentLink(self) -> List[str]:
     content = await self._getContentParser(self.PLUSLINK)
@@ -103,3 +181,4 @@ class Novelpia(Platform):
       age_limit=age_limit,
       author=author
     )
+    

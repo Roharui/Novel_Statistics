@@ -58,5 +58,9 @@ class NovelStatic:
 
   async def searchRecentLink(self):
     # 현재로써는 노벨피아만 작동 시킴, 후일 문피아와 카카오페이지도 추가할것.
-    return await PLATFORM["novelpia.com"].searchRecentLink()
+    plst = [PLATFORM["novelpia.com"], PLATFORM["novel.munpia.com"]]
+    coroutine = await asyncio.gather(*[engin.searchRecentLink() for engin in plst])
+    return list(chain(*coroutine))
 
+  async def searchEpisode(self, url: str):
+    return await PLATFORM["novelpia.com"].searchEpisode(url)

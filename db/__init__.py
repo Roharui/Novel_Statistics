@@ -9,7 +9,8 @@ from sqlalchemy import (
   Enum, 
   TIMESTAMP, 
   Boolean, 
-  ForeignKey, 
+  ForeignKey,
+  Date,
   func,
 )
 from sqlalchemy.sql import expression
@@ -56,10 +57,31 @@ class NovelInfo(Base):
   book = Column(Integer, nullable=False)
 
   novel_id = Column(Integer, ForeignKey('novel.id'), nullable=False)
-  company = relationship("Novel", foreign_keys=[novel_id])
+  novel = relationship("Novel", foreign_keys=[novel_id])
+
+class Episode(Base):
+  __tablename__ = 'novel-episode'
+  id = Column(Integer, primary_key=True)
+
+  created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
+
+  idx = Column(Integer, nullable=False)
+  title = Column(String, nullable=False)
+
+  word_size = Column(String, nullable=False)
+
+  view = Column(Integer, nullable=False)
+  good = Column(Integer, nullable=False)
+  comment = Column(Integer, nullable=False)
+
+  date = Column(Date, nullable=False)
+
+  novel_id = Column(Integer, ForeignKey('novel.id'), nullable=False)
+  novel = relationship("Novel", foreign_keys=[novel_id])
 
 Novel.__table__.create(bind=engine, checkfirst=True)
 NovelInfo.__table__.create(bind=engine, checkfirst=True)
+Episode.__table__.create(bind=engine, checkfirst=True)
 
 Session = sessionmaker(bind=engine)
 session = Session()

@@ -1,3 +1,4 @@
+from typing import List
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -15,8 +16,8 @@ if platform.system()=='Windows':
   asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 from src.app import NovelStatic
-from src.platform.result import Result
-from db import session, Novel, NovelInfo
+from src.platform.result import Result, PlatformType
+from db import session, Novel, NovelInfo, Episode
 
 app = NovelStatic(only_link=True)
 
@@ -49,6 +50,17 @@ async def addInfo(message: bytes):
 
     info = NovelInfo(view=result.view, good=result.good, book=result.book, novel_id=_id)
     session.add(info)
+
+    if result.type == PlatformType.NOVELPIA:
+      episode = await app.searchEpisode(_link)
+
+      for ep in episode:
+        session.add(
+          Episode(
+            **ep.data,
+            novel_id=_id
+          )
+        )
           
   session.commit()
 

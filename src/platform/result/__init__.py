@@ -1,1 +1,1 @@
-from .result import Result, PlatformType
+from .result import Result, PlatformType, Episode
