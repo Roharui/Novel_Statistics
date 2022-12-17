@@ -40,7 +40,7 @@ async def main() -> None:
 
     for p in split(novels, len(novels) // 1440):
       await asyncio.gather(*[safe_publish(channel, x) for x in p])
-      await asyncio.sleep(60)
+      await asyncio.sleep(30)
 
 
 if __name__ == "__main__":
