@@ -1,4 +1,3 @@
 from .app import NovelStatic
-from .exception import WrongLinkException
-from .exception import WrongPageException
-from .platform.novel_platform import Result
+from .exception import WrongLinkException, WrongPageException
+from .platform.novel_platform import Result, Episode

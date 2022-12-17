@@ -4,7 +4,7 @@ import datetime
 from typing import Final, List
 from urllib import parse
 
-from src.exception.wrong_page_exception import WrongPageException
+from src.exception import WrongPageException
 
 from .novel_platform import Platform
 from .result import Result, PlatformType, Episode
@@ -25,6 +25,7 @@ class Munpia(Platform):
   async def searchEpisode(self, url: str) -> List[Episode]:
     page = 1
     result = []
+    content = None
 
     # TODO 후일 비동기 적으로 변경할것... 인데 할수 있나?
     
@@ -83,8 +84,8 @@ class Munpia(Platform):
         if not page in [int(x.text.strip()) for x in pLst if x.find("a").get("class") == None]:
           break
 
-      except Exception:
-        raise WrongPageException()
+      except Exception as e:
+        raise WrongPageException(content, "파싱에 오류가 발생하였습니다.", str(e))
 
     return result
   

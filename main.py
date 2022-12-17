@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+
+load_dotenv()
 
 import argparse
 import asyncio
@@ -16,6 +19,8 @@ async def main():
   args = parser.parse_args()
 
   result = await NovelStatic().search(args.input)
+
+  if result == None: return
 
   if type(result) == list:
     for i in result: print(i)

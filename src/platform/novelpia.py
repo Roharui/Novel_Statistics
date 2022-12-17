@@ -30,6 +30,8 @@ class Novelpia(Platform):
     page = 0
     max_page = 1
 
+    content = None
+    
     result = []
     
     # TODO 후일 비동기 적으로 변경할것... 인데 할수 있나?
@@ -112,7 +114,7 @@ class Novelpia(Platform):
           break
 
       except Exception as e:
-        raise WrongPageException
+        raise WrongPageException(content, "파싱에 오류가 발생하였습니다.", str(e))
 
     return result
 
@@ -182,7 +184,7 @@ class Novelpia(Platform):
       view, book, good = number_text
 
     except AttributeError as e:
-      raise WrongPageException
+      raise WrongPageException(novel_content, "파싱에 오류가 발생하였습니다.", str(e))
 
     return Result(
       title=title,
