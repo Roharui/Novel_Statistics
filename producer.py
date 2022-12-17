@@ -23,8 +23,12 @@ async def publish(channel, item: Novel):
   )
 
 async def safe_publish(channel, item: Novel):
-    async with sem:
-        return await publish(channel, item)
+  async with sem:
+    return await publish(channel, item)
+
+def split(a, n):
+  k, m = divmod(len(a), n)
+  return (a[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
 
 async def main() -> None:
   connection = await aio_pika.connect(os.environ.get("MQ_URL"))
@@ -32,12 +36,11 @@ async def main() -> None:
   async with connection:
     channel = await connection.channel()
 
-    p = [
-      safe_publish(channel, item) for item in 
-      session.query(Novel).filter(Novel.is_able == True).all()
-    ]
+    novels = session.query(Novel).filter(Novel.is_able == True).all()
 
-    await asyncio.gather(*p)
+    for p in split(novels, len(novels) // 1440):
+      await asyncio.gather(*[safe_publish(channel, x) for x in p])
+      await asyncio.sleep(60)
 
 
 if __name__ == "__main__":
