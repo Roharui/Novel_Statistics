@@ -51,16 +51,15 @@ async def addInfo(message: bytes):
     info = NovelInfo(view=result.view, good=result.good, book=result.book, novel_id=_id)
     session.add(info)
 
-    if result.type == PlatformType.NOVELPIA:
-      episode = await app.searchEpisode(_link)
+    episode = await app.searchEpisode(_link)
 
-      for ep in episode:
-        session.add(
-          Episode(
-            **ep.data,
-            novel_id=_id
-          )
+    for ep in episode:
+      session.add(
+        Episode(
+          **ep.data,
+          novel_id=_id
         )
+      )
           
   session.commit()
 

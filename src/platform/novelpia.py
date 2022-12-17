@@ -24,13 +24,14 @@ class Novelpia(Platform):
   def __novelURL(self, num: Union[int, str]) -> str:
     return f"{self.NOVELLINK}/{num}"
 
-    # 소설 링크로 검색
+  # 해당 소설의 에피소드 일람
   async def searchEpisode(self, url: str) -> List[Episode]:
     novel_no = url.split("/")[-1]
     page = 0
 
     result = []
-
+    
+    # TODO 후일 비동기 적으로 변경할것... 인데 할수 있나?
     while True:
       try:
         content = await self._postContentParser(self.EPSODELINK, f"novel_no={novel_no}&page={page}", json=False)
@@ -41,26 +42,38 @@ class Novelpia(Platform):
 
           _, td2, td3 = ep.find_all("td")
 
+          if td2.find("span") == None:
+            break
+
           td2.find("span").extract()
 
           title = td2.find("b").text.strip()
+
           td2.find("b").extract()
 
           idx = len(result) + 1
 
           td2.find("span").extract()
 
+          numbers = td2.find("span")
+
           number_text = [
             int(''.join(i for i in x if i.isdigit())) for x in 
-            td2.text.replace(",", "").replace('\xa0', "").split(" ")
+            numbers.text.replace(",", "").replace('\xa0', "").split(" ")
             if len(x.strip()) 
           ]
 
-          if len(number_text) == 1:
-            word_size = number_text[0]
-            view, comment, good = [0,0,0]
-          else:
-            word_size, view, comment, good = number_text
+          word_size, view, comment, good = [0,0,0,0]
+
+          for i, num in zip(numbers.find_all("i"), number_text):
+            if "ion-document-text" in i["class"]:
+              word_size = num
+            elif "ion-android-people" in i["class"]:
+              view = num
+            elif "ion-chatbox-working" in i["class"]:
+              comment = num
+            elif "ion-thumbsup" in i["class"]:
+              good = num
 
           cur_date = datetime.datetime.now()
 
@@ -71,6 +84,8 @@ class Novelpia(Platform):
 
             if len(date_info) < 3:
               date_info.insert(0, cur_date.year)
+            else:
+              date_info[0] += 2000
 
             date = str(datetime.datetime(*date_info))
 
@@ -100,7 +115,7 @@ class Novelpia(Platform):
 
     return result
 
-
+  # 최근에 올라온 소설 링크
   async def searchRecentLink(self) -> List[str]:
     content = await self._getContentParser(self.PLUSLINK)
 

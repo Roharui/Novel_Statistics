@@ -62,5 +62,17 @@ class NovelStatic:
     coroutine = await asyncio.gather(*[engin.searchRecentLink() for engin in plst])
     return list(chain(*coroutine))
 
-  async def searchEpisode(self, url: str):
-    return await PLATFORM["novelpia.com"].searchEpisode(url)
+  async def searchEpisode(self, _url: str):
+    if url(_url):
+      host = urlparse(self.url).hostname
+
+      if not host in PLATFORM.keys():
+        print(f"[{_url}] - 잘못된 링크입니다.")
+        return []
+      
+      engin: Platform = PLATFORM[host]
+
+      return await engin.searchEpisode(_url)
+    else:
+      print(f"[{_url}] - 잘못된 링크입니다.")
+      return []
