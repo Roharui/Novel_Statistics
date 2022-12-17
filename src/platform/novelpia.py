@@ -28,6 +28,7 @@ class Novelpia(Platform):
   async def searchEpisode(self, url: str) -> List[Episode]:
     novel_no = url.split("/")[-1]
     page = 0
+    max_page = 1
 
     result = []
     
@@ -105,9 +106,9 @@ class Novelpia(Platform):
 
         nxtPage = content.find_all("li", {"class":"page-item"})
 
-        pLst = [int(p.find("div", {"class":"page-link"}).text) for p in nxtPage[1:-1]]
+        max_page = max([int(p.find("div", {"class":"page-link"}).text) for p in nxtPage[1:-1]])
 
-        if not page in pLst:
+        if page >= max_page:
           break
 
       except Exception as e:
