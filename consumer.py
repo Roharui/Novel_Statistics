@@ -42,6 +42,7 @@ async def addInfo(message: bytes):
     ).update({
       "title": result.title,
       "thumbnail": result.thumbnail,
+      "description": result.description,
       "is_end": result.is_end,
       "is_plus": result.is_plus,
       "age_limit": result.age_limit,

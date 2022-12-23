@@ -40,6 +40,7 @@ class Novel(Base):
   thumbnail = Column(String)
   link = Column(String, nullable=False)
   author = Column(String, nullable=False)
+  description = Column(String, nullable=False)
   is_end = Column(Boolean, server_default=expression.false(), default=True)
   is_plus = Column(Boolean, server_default=expression.false(), default=True)
   age_limit = Column(Integer, nullable=False)

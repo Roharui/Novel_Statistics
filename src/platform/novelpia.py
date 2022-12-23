@@ -163,6 +163,8 @@ class Novelpia(Platform):
 
         thumbnail = None if thumbnail == "https://image.novelpia.com" else thumbnail
 
+      description = novel_content.find_all("font", {"class":"font11"})[1].text
+
       is_end = not not (novel_content.find("span", {"class" : "b_comp"}))
       is_plus = not not (novel_content.find("span", {"class" : "b_plus"}))
 
@@ -183,7 +185,7 @@ class Novelpia(Platform):
       number_text = [int(''.join(i for i in x if i.isdigit())) for x in number_data.replace(",", "").replace('\xa0', "").split(" ") if len(x)]
       view, book, good = number_text
 
-    except AttributeError as e:
+    except Exception as e:
       raise WrongPageException(novel_content, "파싱에 오류가 발생하였습니다.", str(e))
 
     return Result(
@@ -197,6 +199,7 @@ class Novelpia(Platform):
       is_end=is_end,
       is_plus=is_plus,
       age_limit=age_limit,
-      author=author
+      author=author,
+      description=description
     )
     

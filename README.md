@@ -55,6 +55,9 @@ postgreSQL로 개발되었으니 되도록이면 해당 DB를 사용해주세요
 DB_URL=<DB URL>
 MQ_URL=<RabbitMQ URL>
 MQ_QUEUE=<queue 이름>
+
+LOG=<에러 로그 출력 방식 [PRINT, FILE]>
+FILE_NAME=<에러 로그 출력 파일 이름 (LOG가 FILE일때만 유효합니다)>
 ```
 
 ## 플랫폼

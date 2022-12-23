@@ -16,6 +16,7 @@ class Result:
     self.book: int = kwargs["book"]
     self.link: str = kwargs["link"]
     self.author: str = kwargs["author"]
+    self.description: str = kwargs["description"]
     self.is_end: bool = kwargs["is_end"]
     self.is_plus: bool = kwargs["is_plus"]
     self.age_limit: int = kwargs["age_limit"]

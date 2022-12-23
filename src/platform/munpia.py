@@ -132,6 +132,8 @@ class Munpia(Platform):
           .find("dd") \
         ).text.strip()
 
+      description = novel_content.find("p", {"class":"story"}).text
+
       is_end = not not (novel_content.find("span", {"class":"xui-finish"}))
       is_plus = not not (novel_content.find("span", {"class":"xui-gold"}))
       
@@ -145,8 +147,8 @@ class Munpia(Platform):
       
       book, view, good, _ = number_list_2
       
-    except AttributeError as e:
-      raise WrongPageException
+    except Exception as e:
+      raise WrongPageException(novel_content, "파싱에 오류가 발생하였습니다.", str(e))
 
     return Result(
       title=title,
@@ -159,5 +161,6 @@ class Munpia(Platform):
       is_end=is_end,
       is_plus=is_plus,
       age_limit=age_limit,
-      author=author
+      author=author,
+      description=description,
     )
