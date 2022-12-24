@@ -18,6 +18,8 @@ from src.app import NovelStatic
 from src.platform.result import Result
 from db import session, Novel, NovelInfo, Episode
 
+from sqlalchemy import func
+
 app = NovelStatic(only_link=True)
 
 async def addInfo(message: bytes):
@@ -53,14 +55,19 @@ async def addInfo(message: bytes):
 
     episode = await app.searchEpisode(_link)
 
+    rep = session.query(func.max(Episode.idx)).filter_by(novel_id = _id).scalar()
+
     for ep in episode:
-      session.add(
-        Episode(
-          **ep.data,
-          novel_id=_id
+      if ep.idx <= rep:
+        session.query(Episode).filter(Episode.novel_id == _id, Episode.idx == ep.idx).update(ep.data)
+      else:
+        session.add(
+          Episode(
+            **ep.data,
+            novel_id=_id
+          )
         )
-      )
-          
+
   session.commit()
 
 

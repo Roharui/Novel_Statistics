@@ -61,9 +61,9 @@ class NovelStatic:
       return []
 
   async def searchEpisode(self, url: str) -> List[Episode]:
-    host = not urlparse(url).hostname
+    host = urlparse(url).hostname
     try:
-      if not checkURL(url) or host in PLATFORM.keys():
+      if not checkURL(url) or not host in PLATFORM.keys():
         raise WrongLinkException(url)
       engin: Platform = PLATFORM[host]
       return await engin.searchEpisode(url)  
