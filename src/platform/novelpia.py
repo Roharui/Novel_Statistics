@@ -114,7 +114,7 @@ class Novelpia(Platform):
           break
 
       except Exception as e:
-        raise WrongPageException(content, "파싱에 오류가 발생하였습니다.", str(e))
+        raise WrongPageException("파싱에 오류가 발생하였습니다.")
 
     return result
 
@@ -186,7 +186,7 @@ class Novelpia(Platform):
       view, book, good = number_text
 
     except Exception as e:
-      raise WrongPageException(novel_content, "파싱에 오류가 발생하였습니다.", str(e))
+      raise WrongPageException("파싱에 오류가 발생하였습니다.")
 
     return Result(
       title=title,

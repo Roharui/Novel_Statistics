@@ -1,14 +1,36 @@
 import os
 
+from datetime import datetime
+
+from discord_webhook import DiscordWebhook
+
 __all__ = ["log"]
 
-def fileInput(text: str) -> None:
+def fileInput(info: str, err: str = None) -> None:
   with open(os.environ.get("FILE_NAME"), "a", encoding="utf8") as f:
-    f.write(text + "\n")
+    f.write(f"[{datetime.now()}] {info}\n")
+    if err != None:
+      f.write(f"{err}\n")
+
+webhook = os.environ.get("WEBHOOK")
+
+def discord(info: str, err: str = None) -> None:
+  text = f"[{datetime.now()}] {info}"
+  if err != None:
+    text += f"\n```\n{err}\n```"
+
+  DiscordWebhook(url=webhook, content=text).execute()
+
+def printLog(info: str, err: str = None) -> None:
+  text = f"[{datetime.now()}] {info}"
+  if err != None:
+    text += f"\n```\n{err}\n```"
+  print(text)
 
 log_method = {
   "PRINT": print,
   "FILE": fileInput,
+  "DISCORD": discord,
   None: print,
 }
 
