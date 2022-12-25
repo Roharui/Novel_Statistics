@@ -33,7 +33,7 @@ python novel_add --start <수집 간격>
 
 다수의 컨슈머를 실행시킨 다음 프로듀서를 실행시켜주세요.
 
-**DDos 공격 취급 방지를 위해 30간격으로 소설 정보가 등록됩니다.**
+**DDos 공격 취급 방지를 위해 30초 간격으로 소설 정보가 등록됩니다.**
 
 ```
 # 프로듀서
@@ -56,8 +56,10 @@ DB_URL=<DB URL>
 MQ_URL=<RabbitMQ URL>
 MQ_QUEUE=<queue 이름>
 
-LOG=<에러 로그 출력 방식 [PRINT, FILE]>
+LOG=<에러 로그 출력 방식 [PRINT, FILE, DISCORD]>
 FILE_NAME=<에러 로그 출력 파일 이름 (LOG가 FILE일때만 유효합니다)>
+
+WEBHOOK=<DISCORD WEBHOOK>
 ```
 
 ## 플랫폼
