@@ -9,7 +9,7 @@ import platform
 if platform.system()=='Windows':
   asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-from src import NovelStatic
+from src import NovelStatistics
 
 async def main():
   parser = argparse.ArgumentParser(description="소설 통계 프로그램")
@@ -18,7 +18,7 @@ async def main():
 
   args = parser.parse_args()
 
-  result = await NovelStatic().search(args.input)
+  result = await NovelStatistics().search(args.input)
 
   if result == None: return
 

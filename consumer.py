@@ -14,13 +14,13 @@ import platform
 if platform.system()=='Windows':
   asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-from src.app import NovelStatic
+from src.app import NovelStatistics
 from src.platform.result import Result
 from db import session, Novel, NovelInfo, Episode
 
 from sqlalchemy import func
 
-app = NovelStatic(only_link=True)
+app = NovelStatistics(only_link=True)
 
 async def addInfo(message: bytes):
   body = json.loads(message.decode())

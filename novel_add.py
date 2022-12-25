@@ -12,12 +12,12 @@ if platform.system()=='Windows':
 
 from datetime import datetime
 
-from src import NovelStatic
+from src import NovelStatistics
 from db import session, Novel
 
 from src.platform import Result
 
-app = NovelStatic()
+app = NovelStatistics()
 
 def parseResult(item: Result):
   data = item.data

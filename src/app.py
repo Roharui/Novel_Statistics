@@ -15,7 +15,7 @@ PLATFORM: Dict[str, Platform] = {
   "page.kakao.com": Kakaopage()
 }
 
-class NovelStatic:
+class NovelStatistics:
   def __init__(self, only_link: bool = False) -> None:
     self.only_link = only_link
 
