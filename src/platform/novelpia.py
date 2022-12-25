@@ -48,7 +48,7 @@ class Novelpia(Platform):
           if td2.find("span") == None:
             break
 
-          td2.find("span").extract()
+          [span.extract() for span in td2.find("b").find_all("span")]
 
           title = td2.find("b").text.strip()
 
