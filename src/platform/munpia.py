@@ -7,7 +7,7 @@ from urllib import parse
 from src.exception import WrongPageException
 
 from .novel_platform import Platform
-from .result import Result, PlatformType, Episode
+from .result import Result, PlatformType, Episode, Tag
 
 class Munpia(Platform):
   def __init__(self) -> None:
@@ -134,6 +134,10 @@ class Munpia(Platform):
 
       description = novel_content.find("p", {"class":"story"}).text
 
+      tag_wrap = novel_content.find("div", {"class":"novel-info-area"})
+
+      tags = [] if tag_wrap == None else [Tag(name=tag.text.strip()) for tag in tag_wrap.find_all("a")]
+
       is_end = not not (novel_content.find("span", {"class":"xui-finish"}))
       is_plus = not not (novel_content.find("span", {"class":"xui-gold"}))
       
@@ -163,4 +167,5 @@ class Munpia(Platform):
       age_limit=age_limit,
       author=author,
       description=description,
+      tags=tags
     )

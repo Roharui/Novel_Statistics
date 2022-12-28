@@ -18,12 +18,18 @@ from sqlalchemy.orm import sessionmaker, declarative_base, relationship
 
 from src.platform.result import PlatformType
 
-__all__ = ["Novel", "NovelInfo", "session"]
+__all__ = ["Novel", "NovelInfo", "Episode", "session"]
 
 engine = create_engine(os.environ.get("DB_URL"))
 
 Base = declarative_base()
 
+class NovelTagRef(Base):
+  __tablename__ = 'novel-tag-ref'
+
+  novel_id = Column(Integer, ForeignKey('novel.id'), primary_key=True)
+  tag_id = Column(Integer, ForeignKey('novel-tag.id'), primary_key=True)
+  
 class Novel(Base):
   __tablename__ = 'novel'
   id = Column(Integer, primary_key=True)
@@ -45,7 +51,13 @@ class Novel(Base):
   is_plus = Column(Boolean, server_default=expression.false(), default=True)
   age_limit = Column(Integer, nullable=False)
   is_able = Column(Boolean, server_default=expression.false(), default=True)
+  tags = relationship('Tag', secondary=NovelTagRef.__table__, back_populates='novels')
 
+class Tag(Base):
+  __tablename__ = 'novel-tag'
+  id = Column(Integer, primary_key=True)
+  name = Column(String, nullable=False)
+  novels = relationship('Novel', secondary=NovelTagRef.__table__, back_populates='tags')
 
 class NovelInfo(Base):
   __tablename__ = 'novel-info'
@@ -81,6 +93,8 @@ class Episode(Base):
   novel = relationship("Novel", foreign_keys=[novel_id])
 
 Novel.__table__.create(bind=engine, checkfirst=True)
+Tag.__table__.create(bind=engine, checkfirst=True)
+NovelTagRef.__table__.create(bind=engine, checkfirst=True)
 NovelInfo.__table__.create(bind=engine, checkfirst=True)
 Episode.__table__.create(bind=engine, checkfirst=True)
 

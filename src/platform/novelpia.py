@@ -7,7 +7,7 @@ from urllib import parse
 from src.exception import WrongPageException
 
 from .novel_platform import Platform
-from .result import Result, PlatformType, Episode
+from .result import Result, PlatformType, Episode, Tag
 
 class Novelpia(Platform):
   def __init__(self) -> None:
@@ -165,6 +165,8 @@ class Novelpia(Platform):
 
       description = novel_content.find_all("font", {"class":"font11"})[1].text
 
+      tags = [Tag(name=tag.text) for tag in novel_content.find_all("div")[-1].find_all("span")][:-1]
+
       is_end = not not (novel_content.find("span", {"class" : "b_comp"}))
       is_plus = not not (novel_content.find("span", {"class" : "b_plus"}))
 
@@ -200,6 +202,7 @@ class Novelpia(Platform):
       is_plus=is_plus,
       age_limit=age_limit,
       author=author,
-      description=description
+      description=description,
+      tags=tags
     )
     

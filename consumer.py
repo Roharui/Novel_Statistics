@@ -29,7 +29,7 @@ async def addInfo(message: bytes):
   result: Result = await app.search(_link)
 
   if result == None:
-    print(f"[{_id}] - \"{result.title}\" (미사용으로 전환)")
+    print(f"[{_id}] - \"{_link}\" (미사용으로 전환)")
     session.query(Novel).filter(
       Novel.id == _id
     ).update({

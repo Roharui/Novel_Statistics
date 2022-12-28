@@ -1,5 +1,6 @@
 
 from enum import Enum
+from typing import List
 
 class PlatformType(Enum):
   NOVELPIA="novelpia"
@@ -20,6 +21,7 @@ class Result:
     self.is_end: bool = kwargs["is_end"]
     self.is_plus: bool = kwargs["is_plus"]
     self.age_limit: int = kwargs["age_limit"]
+    self.tags: List[Tag] = kwargs["tags"]
     self.data = kwargs
 
   def __str__(self) -> str:
@@ -37,6 +39,17 @@ class Episode:
     self.good: int = kwargs["good"]
     self.comment: int = kwargs["comment"]
     self.date: str = kwargs["date"]
+    self.data = kwargs
+
+  def __str__(self) -> str:
+    return str(self.data)
+
+  def __repr__(self) -> str:
+    return str(self.data)
+
+class Tag:
+  def __init__(self, **kwargs) -> None:
+    self.name: str = kwargs["name"]
     self.data = kwargs
 
   def __str__(self) -> str:

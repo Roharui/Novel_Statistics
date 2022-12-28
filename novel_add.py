@@ -13,7 +13,7 @@ if platform.system()=='Windows':
 from datetime import datetime
 
 from src import NovelStatistics
-from db import session, Novel
+from db import session, Novel, Tag
 
 from src.platform import Result
 
@@ -21,20 +21,39 @@ app = NovelStatistics()
 
 def parseResult(item: Result):
   data = item.data
+  tags = item.tags
   
   del data["view"]
   del data["good"]
   del data["book"]
+  del data["tags"]
 
-  return data
+  return data, tags
 
-def insertDB(item: Result):
-  data = parseResult(item)
-  session.add(Novel(**data))
+def commitDB(item: Result, _id: int = None):
+  data, tags = parseResult(item)
 
-def updateDB(_id: int, item: Result):
-  data = parseResult(item)
-  session.query(Novel).filter(Novel.id == _id).update(data)
+  tagLst = []
+  for tag in tags:
+    dbTag = session.query(Tag).filter(Tag.name == tag.name).one_or_none()
+    if dbTag != None:
+      tagLst.append(dbTag)
+    else:
+      t = Tag(**tag.data)
+      session.add(t)
+      session.commit()
+      session.refresh(t)
+      tagLst.append(t)
+
+  data["tags"] = tagLst
+
+  if _id == None:
+    session.add(Novel(**data))
+  else:
+    novel = session.query(Novel).filter(Novel.id == _id).one()
+    novel.tags = tagLst
+
+  session.commit()
 
 async def main():
   result = await app.searchRecentLink()
@@ -52,15 +71,9 @@ async def main():
       print(f"{i} - 생략됨")
       continue
 
-    if _id == None:
-      insertDB(item)
-
-    else:
-      updateDB(_id, item)
+    commitDB(item, _id=_id)
 
   print("=== 소설 추가 완료 ===")
-
-  session.commit()
 
 
 async def doNow(_input: str):
@@ -68,9 +81,9 @@ async def doNow(_input: str):
 
   if type(item) == list:
     for i in item:
-      insertDB(i)
+      commitDB(i)
   else:
-    insertDB(item)
+    commitDB(item)
 
   session.commit()
   
