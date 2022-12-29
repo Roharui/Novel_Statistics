@@ -34,7 +34,8 @@ class Novelpia(Platform):
     
     result = []
     
-    # TODO 후일 비동기 적으로 변경할것... 인데 할수 있나?
+    # TODO 후일 비동기 적으로 변경할 것
+    
     while True:
       try:
         content = await self._postContentParser(self.EPSODELINK, f"novel_no={novel_no}&page={page}", json=False)

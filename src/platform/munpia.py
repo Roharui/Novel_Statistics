@@ -1,4 +1,3 @@
-import json
 import datetime
 
 from typing import Final, List
@@ -27,7 +26,7 @@ class Munpia(Platform):
     result = []
     content = None
 
-    # TODO 후일 비동기 적으로 변경할것... 인데 할수 있나?
+    # TODO 후일 비동기 적으로 변경할 것
     
     while True:
       try:

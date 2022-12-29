@@ -12,7 +12,7 @@ from itertools import chain
 PLATFORM: Dict[str, Platform] = {
   "novelpia.com" : Novelpia(),
   "novel.munpia.com": Munpia(),
-  "page.kakao.com": Kakaopage()
+  # "page.kakao.com": Kakaopage()
 }
 
 class NovelStatistics:
@@ -51,10 +51,8 @@ class NovelStatistics:
       e.log()
 
   async def searchRecentLink(self) -> List[Result]:
-    # TODO 카카오페이지도 추가할것.
-    plst = [PLATFORM["novelpia.com"], PLATFORM["novel.munpia.com"]]
     try:
-      coroutine = await asyncio.gather(*[engin.searchRecentLink() for engin in plst])
+      coroutine = await asyncio.gather(*[engin.searchRecentLink() for engin in PLATFORM.values()])
       return list(chain(*coroutine))
     except (WrongLinkException, WrongPageException) as e:
       e.log()
