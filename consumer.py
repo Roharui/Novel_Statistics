@@ -14,13 +14,32 @@ import platform
 if platform.system()=='Windows':
   asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
+from typing import List
+
 from src.app import NovelStatistics
-from src.platform.result import Result
-from db import session, Novel, NovelInfo, Episode
+from src.platform import Result, Tag as ResultTag
+from db import session, Novel, NovelInfo, Episode, Tag
 
 from sqlalchemy import func
 
 app = NovelStatistics(only_link=True)
+
+def commitTag(tags: List[ResultTag]):
+  tagLst = []
+  for tag in tags:
+    dbTag = session.query(Tag).filter(Tag.name == tag.name).one_or_none()
+    if dbTag != None:
+      tagLst.append(dbTag)
+    else:
+      t = Tag(**tag.data)
+      tagLst.append(t)
+      session.add(t)
+  
+  session.commit()
+
+  [session.refresh(t) for t in tagLst]
+
+  return tagLst
 
 async def addInfo(message: bytes):
   body = json.loads(message.decode())
@@ -39,6 +58,8 @@ async def addInfo(message: bytes):
   else:
     print(f"[{_id}] - \"{result.title}\"")
 
+    tagLst = commitTag(result.tags)
+
     session.query(Novel).filter(
       Novel.id == _id
     ).update({
@@ -49,6 +70,9 @@ async def addInfo(message: bytes):
       "is_plus": result.is_plus,
       "age_limit": result.age_limit,
     })
+  
+    novel = session.query(Novel).filter(Novel.id == _id).one()
+    novel.tags = tagLst
 
     info = NovelInfo(view=result.view, good=result.good, book=result.book, novel_id=_id)
     session.add(info)

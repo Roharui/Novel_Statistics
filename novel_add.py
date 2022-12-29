@@ -11,11 +11,12 @@ if platform.system()=='Windows':
   asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 from datetime import datetime
+from typing import List
 
 from src import NovelStatistics
 from db import session, Novel, Tag
 
-from src.platform import Result
+from src.platform import Result, Tag as ResultTag
 
 app = NovelStatistics()
 
@@ -30,9 +31,7 @@ def parseResult(item: Result):
 
   return data, tags
 
-def commitDB(item: Result, _id: int = None):
-  data, tags = parseResult(item)
-
+def commitTag(tags: List[ResultTag]):
   tagLst = []
   for tag in tags:
     dbTag = session.query(Tag).filter(Tag.name == tag.name).one_or_none()
@@ -40,18 +39,25 @@ def commitDB(item: Result, _id: int = None):
       tagLst.append(dbTag)
     else:
       t = Tag(**tag.data)
-      session.add(t)
-      session.commit()
-      session.refresh(t)
       tagLst.append(t)
+      session.add(t)
+  
+  session.commit()
 
-  data["tags"] = tagLst
+  [session.refresh(t) for t in tagLst]
+
+  return tagLst
+
+def commitDB(item: Result, _id: int = None):
+  data, tags = parseResult(item)
+
+  data["tags"] = commitTag(tags)
 
   if _id == None:
     session.add(Novel(**data))
   else:
     novel = session.query(Novel).filter(Novel.id == _id).one()
-    novel.tags = tagLst
+    novel.tags = data["tags"]
 
   session.commit()
 
