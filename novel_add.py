@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
   parser.add_argument("--input", required=False, help="소설 제목 혹은 링크")
   parser.add_argument("--now", required=False, default=False, help="바로 시작", action='store_true')
-  parser.add_argument("--start", type=int, required=False, default="5", help="프로그램 시작 시간 (분)")
+  parser.add_argument("--start", nargs='+', required=False, default=[":30", ":00"], help="프로그램 시작 시간 (분)")
 
   args = parser.parse_args()
 
@@ -110,11 +110,12 @@ if __name__ == '__main__':
     import aioschedule as schedule
     from time import sleep
 
-    schedule.every(args.start).minutes.do(main)
+    for i in args.start:
+      schedule.every().hour.at(i).do(main)
 
     loop = asyncio.get_event_loop()
     
-    print(f" [x] 소설 크롤링 봇이 실행되었습니다. 이 프로그램의 작동 주기는 [{args.start}]분 입니다.")
+    print(f" [x] 소설 크롤링 봇이 실행되었습니다. 이 프로그램의 작동 시각은 [{','.join(args.start)}]분 입니다.")
 
     while True:
       loop.run_until_complete(schedule.run_pending())
