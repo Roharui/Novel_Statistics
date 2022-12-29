@@ -18,7 +18,7 @@ from typing import List
 
 from src.app import NovelStatistics
 from src.platform import Result, Tag as ResultTag
-from db import session, Novel, NovelInfo, Episode, Tag
+from src.db import session, Novel, NovelInfo, Episode, Tag
 
 from sqlalchemy import func
 

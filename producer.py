@@ -9,7 +9,7 @@ import aio_pika
 
 import json
 
-from db import session, Novel
+from src.db import session, Novel
 
 sem = asyncio.Semaphore(10)
 

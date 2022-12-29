@@ -14,7 +14,7 @@ from datetime import datetime
 from typing import List
 
 from src import NovelStatistics
-from db import session, Novel, Tag
+from src.db import session, Novel, Tag
 
 from src.platform import Result, Tag as ResultTag
 
