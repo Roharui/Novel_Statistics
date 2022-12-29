@@ -27,7 +27,10 @@ async def safe_publish(channel, item: Novel):
     return await publish(channel, item)
 
 def split(a, n):
-  k, m = divmod(len(a), n)
+  if n != 0:
+    k, m = divmod(len(a), n)
+  else:
+    k, m = divmod(len(a), 1)
   return (a[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
 
 async def main() -> None:
