@@ -95,11 +95,17 @@ async def addInfo(message: bytes):
 
 
 async def main() -> None:
-    connection = await aio_pika.connect_robust(
-        os.environ.get("MQ_URL"),
-    )
-
+    MQ_URL = os.environ.get("MQ_URL")
     queue_name = os.environ.get("MQ_QUEUE")
+
+    if queue_name == None:
+        queue_name = "novel.statistic"
+
+    if MQ_URL == None:
+        print("올바른 환경 변수가 존재하지 않습니다. .env 파일을 확인해주세요.")
+        return
+
+    connection = await aio_pika.connect_robust(MQ_URL)
 
     async with connection:
         # Creating channel
