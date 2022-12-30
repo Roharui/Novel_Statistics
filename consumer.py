@@ -84,7 +84,7 @@ async def addInfo(message: bytes):
         rep = session.query(func.max(Episode.idx)).filter_by(novel_id=_id).scalar()
 
         for ep in episode:
-            if ep.idx <= rep:
+            if rep == None or ep.idx <= rep:
                 session.query(Episode).filter(
                     Episode.novel_id == _id, Episode.idx == ep.idx
                 ).update(ep.data)
