@@ -24,6 +24,8 @@ from sqlalchemy import func
 
 app = NovelStatistics(only_link=True)
 
+WAIT_SEC = 10
+
 
 def commitTag(tags: List[ResultTag]):
     tagLst = []
@@ -113,10 +115,21 @@ async def main() -> None:
             async for message in queue_iter:
                 async with message.process():
                     await addInfo(message.body)
+                    await asyncio.sleep(10)
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.WARNING)
+
+    import argparse
+
+    parser = argparse.ArgumentParser(description="소설 통계 프로그램 컨슈머")
+
+    parser.add_argument("--wait", type=int, required=False, default=10, help="대기 시간")
+
+    args = parser.parse_args()
+
+    WAIT_SEC = args.wait
 
     print(f" [x] 소설 크롤링 컨슈머가 실행되었습니다.")
 

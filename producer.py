@@ -42,9 +42,7 @@ async def main() -> None:
 
         novels = session.query(Novel).filter(Novel.is_able == True).all()
 
-        for p in split(novels, len(novels) // 1440):
-            await asyncio.gather(*[safe_publish(channel, x) for x in p])
-            await asyncio.sleep(30)
+        await asyncio.gather(*[safe_publish(channel, x) for x in novels])
 
 
 if __name__ == "__main__":
