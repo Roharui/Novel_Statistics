@@ -40,7 +40,9 @@ async def main() -> None:
     async with connection:
         channel = await connection.channel()
 
-        novels = session.query(Novel).filter(Novel.is_able == True).all()
+        novels = (
+            session.query(Novel).filter(Novel.is_able == True).order_by(Novel.id).all()
+        )
 
         await asyncio.gather(*[safe_publish(channel, x) for x in novels])
 
