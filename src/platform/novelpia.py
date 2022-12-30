@@ -9,201 +9,228 @@ from src.exception import WrongPageException
 from .novel_platform import Platform
 from .result import Result, PlatformType, Episode, Tag
 
+
 class Novelpia(Platform):
-  def __init__(self) -> None:
-    super().__init__()
-    self.SEARCHLINK: Final[str] =  "https://novelpia.com/proc"
-    self.NOVELLINK: Final[str] = "https://novelpia.com/novel"
-    self.PLUSLINK: Final[str] = "https://novelpia.com/plus"
-    self.EPSODELINK: Final[str] = "https://novelpia.com/proc/episode_list"
+    def __init__(self) -> None:
+        super().__init__()
+        self.SEARCHLINK: Final[str] = "https://novelpia.com/proc"
+        self.NOVELLINK: Final[str] = "https://novelpia.com/novel"
+        self.PLUSLINK: Final[str] = "https://novelpia.com/plus"
+        self.EPSODELINK: Final[str] = "https://novelpia.com/proc/episode_list"
 
-  def __searchURL(self, word: str) -> str:
-    word = parse.quote(word)
-    return f"{self.SEARCHLINK}/novelsearch/{word}"
+    def __searchURL(self, word: str) -> str:
+        word = parse.quote(word)
+        return f"{self.SEARCHLINK}/novelsearch/{word}"
 
-  def __novelURL(self, num: Union[int, str]) -> str:
-    return f"{self.NOVELLINK}/{num}"
+    def __novelURL(self, num: Union[int, str]) -> str:
+        return f"{self.NOVELLINK}/{num}"
 
-  # 해당 소설의 에피소드 일람
-  async def searchEpisode(self, url: str) -> List[Episode]:
-    novel_no = url.split("/")[-1]
-    page = 0
-    max_page = 1
+    # 해당 소설의 에피소드 일람
+    async def searchEpisode(self, url: str) -> List[Episode]:
+        novel_no = url.split("/")[-1]
+        page = 0
+        max_page = 1
 
-    content = None
-    
-    result = []
-    
-    # TODO 후일 비동기 적으로 변경할 것
-    
-    while True:
-      try:
-        content = await self._postContentParser(self.EPSODELINK, f"novel_no={novel_no}&page={page}", json=False)
+        content = None
 
-        epLst = content.find_all("tr", {"class":"ep_style5"})
+        result = []
 
-        for ep in epLst:
+        # TODO 후일 비동기 적으로 변경할 것
 
-          _, td2, td3 = ep.find_all("td")
+        while True:
+            try:
+                content = await self._postContentParser(
+                    self.EPSODELINK, f"novel_no={novel_no}&page={page}", json=False
+                )
 
-          if td2.find("span") == None:
-            break
+                epLst = content.find_all("tr", {"class": "ep_style5"})
 
-          [span.extract() for span in td2.find("b").find_all("span")]
+                for ep in epLst:
 
-          title = td2.find("b").text.strip()
+                    _, td2, td3 = ep.find_all("td")
 
-          td2.find("b").extract()
+                    if td2.find("span") == None:
+                        break
 
-          idx = len(result) + 1
+                    [span.extract() for span in td2.find("b").find_all("span")]
 
-          td2.find("span").extract()
+                    title = td2.find("b").text.strip()
 
-          numbers = td2.find("span")
+                    td2.find("b").extract()
 
-          number_text = [
-            int(''.join(i for i in x if i.isdigit())) for x in 
-            numbers.text.replace(",", "").replace('\xa0', "").split(" ")
-            if len(x.strip()) 
-          ]
+                    idx = len(result) + 1
 
-          word_size, view, comment, good = [0,0,0,0]
+                    td2.find("span").extract()
 
-          for i, num in zip(numbers.find_all("i"), number_text):
-            if "ion-document-text" in i["class"]:
-              word_size = num
-            elif "ion-android-people" in i["class"]:
-              view = num
-            elif "ion-chatbox-working" in i["class"]:
-              comment = num
-            elif "ion-thumbsup" in i["class"]:
-              good = num
+                    numbers = td2.find("span")
 
-          cur_date = datetime.datetime.now()
+                    number_text = [
+                        int("".join(i for i in x if i.isdigit()))
+                        for x in numbers.text.replace(",", "")
+                        .replace("\xa0", "")
+                        .split(" ")
+                        if len(x.strip())
+                    ]
 
-          if td3.text.find("전") >= 0:
-            date = str(datetime.datetime(cur_date.year, cur_date.month, cur_date.day))
-          else:
-            date_info = [int(x) for x in td3.text.split(".")]
+                    word_size, view, comment, good = [0, 0, 0, 0]
 
-            if len(date_info) < 3:
-              date_info.insert(0, cur_date.year)
-            else:
-              date_info[0] += 2000
+                    for i, num in zip(numbers.find_all("i"), number_text):
+                        if "ion-document-text" in i["class"]:
+                            word_size = num
+                        elif "ion-android-people" in i["class"]:
+                            view = num
+                        elif "ion-chatbox-working" in i["class"]:
+                            comment = num
+                        elif "ion-thumbsup" in i["class"]:
+                            good = num
 
-            date = str(datetime.datetime(*date_info))
+                    cur_date = datetime.datetime.now()
 
-          result.append(
-            Episode(
-              idx=idx,
-              title=title,
-              word_size=str(word_size),
-              view=view,
-              comment=comment,
-              good=good,
-              date=date,
+                    if td3.text.find("전") >= 0:
+                        date = str(
+                            datetime.datetime(
+                                cur_date.year, cur_date.month, cur_date.day
+                            )
+                        )
+                    else:
+                        date_info = [int(x) for x in td3.text.split(".")]
+
+                        if len(date_info) < 3:
+                            date_info.insert(0, cur_date.year)
+                        else:
+                            date_info[0] += 2000
+
+                        date = str(datetime.datetime(*date_info))
+
+                    result.append(
+                        Episode(
+                            idx=idx,
+                            title=title,
+                            word_size=str(word_size),
+                            view=view,
+                            comment=comment,
+                            good=good,
+                            date=date,
+                        )
+                    )
+
+                page += 1
+
+                nxtPage = content.find_all("li", {"class": "page-item"})
+
+                max_page = max(
+                    [
+                        int(p.find("div", {"class": "page-link"}).text)
+                        for p in nxtPage[1:-1]
+                    ]
+                )
+
+                if page >= max_page:
+                    break
+
+            except Exception as e:
+                raise WrongPageException("파싱에 오류가 발생하였습니다.")
+
+        return result
+
+    # 최근에 올라온 소설 링크
+    async def searchRecentLink(self) -> List[str]:
+        content = await self._getContentParser(self.PLUSLINK)
+
+        return [
+            self.__novelURL(
+                next(filter(lambda a: a.find("novel_") >= 0, item["class"])).split("_")[
+                    -1
+                ]
             )
-          )
+            for item in content.find_all("div", {"class": "novelbox"})
+        ]
 
-        page += 1
+    # 소설 제목으로 검색
+    async def searchTitle(self, title: str) -> List[Result]:
+        url = self.__searchURL(title)
+        content = json.loads(await self._getContent(url))
 
-        nxtPage = content.find_all("li", {"class":"page-item"})
+        novel = content["data"]["search_result"]
 
-        max_page = max([int(p.find("div", {"class":"page-link"}).text) for p in nxtPage[1:-1]])
+        novel_url = [self.__novelURL(novel_num["novel_no"]) for novel_num in novel]
 
-        if page >= max_page:
-          break
+        return [self.searchURL(url) for url in novel_url]
 
-      except Exception as e:
-        raise WrongPageException("파싱에 오류가 발생하였습니다.")
+    # 소설 링크로 검색
+    async def searchURL(self, url: str) -> Result:
+        content = await self._getContentParser(url)
 
-    return result
+        try:
+            novel_content = (
+                content.find("div", {"class": "mobile_hidden s_inv"})
+                .find("div")
+                .find("table")
+            )
+            number_data = novel_content.find_all("tr")[2].find("div").find("font").text
 
-  # 최근에 올라온 소설 링크
-  async def searchRecentLink(self) -> List[str]:
-    content = await self._getContentParser(self.PLUSLINK)
+            thumbnail_wrap = novel_content.find("tr").find("td").find(
+                "a"
+            ) or novel_content.find("tr").find("td")
 
-    return [
-      self.__novelURL(next(filter(lambda a: a.find("novel_") >= 0, item["class"])).split("_")[-1])
-      for item in content.find_all("div", {"class": "novelbox"})
-    ]
+            thumbnail = None
+            if not thumbnail_wrap is None:
+                thumbnail = "https:" + thumbnail_wrap.find("img")["src"].strip()
 
-  # 소설 제목으로 검색
-  async def searchTitle(self, title: str) -> List[Result]:
-    url = self.__searchURL(title)
-    content = json.loads(await self._getContent(url))
+                thumbnail = (
+                    None if thumbnail == "https://image.novelpia.com" else thumbnail
+                )
 
-    novel = content["data"]["search_result"]
+            description = novel_content.find_all("font", {"class": "font11"})[1].text
 
-    novel_url = [self.__novelURL(novel_num["novel_no"]) for novel_num in novel]
+            tags = [
+                Tag(name=tag.text)
+                for tag in novel_content.find_all("div")[-1].find_all("span")
+            ][:-1]
 
-    return [self.searchURL(url) for url in novel_url]
+            is_end = not not (novel_content.find("span", {"class": "b_comp"}))
+            is_plus = not not (novel_content.find("span", {"class": "b_plus"}))
 
-  # 소설 링크로 검색
-  async def searchURL(self, url: str) -> Result:
-    content = await self._getContentParser(url)
+            age_limit = (
+                19
+                if novel_content.find("span", {"class": "b_19"})
+                else 15
+                if novel_content.find("span", {"class": "b_15"})
+                else 0
+            )
 
-    try:
-      novel_content = content.find("div", {"class":"mobile_hidden s_inv"}).find("div").find("table")
-      number_data = novel_content.find_all("tr")[2].find("div").find("font").text
+            title = novel_content.find("tr").find_all("td")[1].find("span").text
 
-      thumbnail_wrap = novel_content \
-        .find("tr") \
-        .find("td") \
-        .find("a") \
-        or \
-        novel_content \
-        .find("tr") \
-        .find("td")
+            author = (
+                novel_content.find("tr")
+                .find_all("td")[1]
+                .find_all("font")[1]
+                .find("a")
+                .text
+            )
 
-      thumbnail = None
-      if not thumbnail_wrap is None:
-        thumbnail = "https:" + thumbnail_wrap \
-        .find("img")["src"] \
-        .strip()
+            number_text = [
+                int("".join(i for i in x if i.isdigit()))
+                for x in number_data.replace(",", "").replace("\xa0", "").split(" ")
+                if len(x)
+            ]
+            view, book, good = number_text
 
-        thumbnail = None if thumbnail == "https://image.novelpia.com" else thumbnail
+        except Exception as e:
+            raise WrongPageException("파싱에 오류가 발생하였습니다.")
 
-      description = novel_content.find_all("font", {"class":"font11"})[1].text
-
-      tags = [Tag(name=tag.text) for tag in novel_content.find_all("div")[-1].find_all("span")][:-1]
-
-      is_end = not not (novel_content.find("span", {"class" : "b_comp"}))
-      is_plus = not not (novel_content.find("span", {"class" : "b_plus"}))
-
-      age_limit = 19 if novel_content.find("span", {"class" : "b_19"}) \
-        else 15 if novel_content.find("span", {"class" : "b_15"}) else 0
-
-      title = novel_content \
-        .find("tr") \
-        .find_all("td")[1] \
-        .find("span").text
-
-      author = novel_content \
-        .find("tr") \
-        .find_all("td")[1] \
-        .find_all("font")[1] \
-        .find("a").text
-
-      number_text = [int(''.join(i for i in x if i.isdigit())) for x in number_data.replace(",", "").replace('\xa0', "").split(" ") if len(x)]
-      view, book, good = number_text
-
-    except Exception as e:
-      raise WrongPageException("파싱에 오류가 발생하였습니다.")
-
-    return Result(
-      title=title,
-      thumbnail=thumbnail,
-      view=view,
-      book=book,
-      good=good,
-      type=PlatformType.NOVELPIA,
-      link=url,
-      is_end=is_end,
-      is_plus=is_plus,
-      age_limit=age_limit,
-      author=author,
-      description=description,
-      tags=tags
-    )
-    
+        return Result(
+            title=title,
+            thumbnail=thumbnail,
+            view=view,
+            book=book,
+            good=good,
+            type=PlatformType.NOVELPIA,
+            link=url,
+            is_end=is_end,
+            is_plus=is_plus,
+            age_limit=age_limit,
+            author=author,
+            description=description,
+            tags=tags,
+        )
