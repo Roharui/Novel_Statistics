@@ -1,5 +1,5 @@
 import datetime
-from datetime import timezone
+from pytz import timezone
 
 from typing import Final, List
 from urllib import parse

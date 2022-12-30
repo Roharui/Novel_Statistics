@@ -1,7 +1,7 @@
 import json
-import datetime
 
-from datetime import timezone
+import datetime
+from pytz import timezone
 
 from typing import Final, List, Union
 from urllib import parse

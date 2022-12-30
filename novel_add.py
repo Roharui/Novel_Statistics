@@ -9,7 +9,9 @@ import platform
 if platform.system() == "Windows":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-from datetime import datetime, timezone
+from pytz import timezone
+from datetime import datetime
+
 from typing import List
 
 from src import NovelStatistics

@@ -1,6 +1,7 @@
 import os
 
-from datetime import datetime, timezone
+from pytz import timezone
+from datetime import datetime
 
 from discord_webhook import DiscordWebhook
 
