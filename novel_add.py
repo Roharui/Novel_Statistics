@@ -9,7 +9,7 @@ import platform
 if platform.system() == "Windows":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
 from src import NovelStatistics
@@ -68,7 +68,7 @@ async def main():
     result = await app.searchRecentLink()
 
     print(f"=== 소설 추가 시작 ===")
-    print(f"{datetime.now()}")
+    print(f"{datetime.now(timezone('Asia/Seoul'))}")
     for i in result:
 
         print(f"{i} - 검색 시작")

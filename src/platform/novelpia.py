@@ -1,6 +1,8 @@
 import json
 import datetime
 
+from datetime import timezone
+
 from typing import Final, List, Union
 from urllib import parse
 
@@ -84,7 +86,7 @@ class Novelpia(Platform):
                         elif "ion-thumbsup" in i["class"]:
                             good = num
 
-                    cur_date = datetime.datetime.now()
+                    cur_date = datetime.datetime.now(timezone("Asia/Seoul"))
 
                     if td3.text.find("전") >= 0:
                         date = str(

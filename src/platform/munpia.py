@@ -1,4 +1,5 @@
 import datetime
+from datetime import timezone
 
 from typing import Final, List
 from urllib import parse
@@ -51,7 +52,7 @@ class Munpia(Platform):
 
                     date_info = tr.find("td", {"class": "date"}).text
 
-                    cur_date = datetime.datetime.now()
+                    cur_date = datetime.datetime.now(timezone("Asia/Seoul"))
 
                     if date_info.find("전") >= 0:
                         date = str(cur_date.date())
