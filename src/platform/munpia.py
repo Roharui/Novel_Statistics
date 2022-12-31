@@ -96,7 +96,7 @@ class Munpia(Platform):
                     break
 
             except Exception as e:
-                raise WrongPageException("파싱에 오류가 발생하였습니다.")
+                raise WrongPageException("파싱에 오류가 발생하였습니다.", url)
 
         return result
 
@@ -171,7 +171,7 @@ class Munpia(Platform):
             book, view, good, _ = number_list_2
 
         except Exception as e:
-            raise WrongPageException("파싱에 오류가 발생하였습니다.")
+            raise WrongPageException("파싱에 오류가 발생하였습니다.", url)
 
         return Result(
             title=title,
